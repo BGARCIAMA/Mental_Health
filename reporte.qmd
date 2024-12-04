@@ -1,0 +1,203 @@
+---
+title: "Mental Health"
+author: 
+  - "Lauro Reyes Rosas - 214532"
+  - "Blanca Estela García Manjarrez - 118886"
+  - "Yuneri Pérez Arellano - 199813"
+format:
+  html:
+    code-fold: false
+jupyter: python3
+subtitle: "ITAM - Aprendizaje de Máquina"
+date: "Fecha de entrega: 2024-12-11"
+professor: "Felipe González"
+cache: true
+---
+
+En este proyecto, abordaremos la tarea de predecir la variable objetivo **Depresión** utilizando un conjunto de datos titulado **Salud Mental**. Este dataset es el resultado de una encuesta integral cuyo propósito fue analizar los factores asociados al riesgo de depresión en adultos. La comprensión de estos factores puede contribuir al desarrollo de intervenciones más efectivas en el ámbito de la salud mental.
+
+La encuesta fue llevada a cabo de manera anónima entre enero y junio de 2023 en diversas ciudades, involucrando a personas de diferentes orígenes y profesiones. Los participantes, con edades entre 18 y 60 años, compartieron voluntariamente información sobre una amplia variedad de aspectos, tales como edad, género, ciudad de residencia, entre otros.
+
+El conjunto de datos contiene 140,700 registros en el conjunto de entrenamiento y está compuesto por 20 variables, descritas a continuación:
+
+| Variable                                  | Descripción                                               |
+| ----------------------------------------- | --------------------------------------------------------- |
+| id                                        | Identificador único del registro                          |
+| Nombre                                    | Nombre del participante                                   |
+| Género                                    | Género del participante                                   |
+| Edad                                      | Edad del participante                                     |
+| Ciudad                                    | Ciudad de residencia                                      |
+| Profesionista/Estudiante                  | Ocupación principal                                       |
+| Profesión                                 | Campo laboral o académico                                 |
+| Presión\_académica                        | Nivel de presión relacionado con los estudios             |
+| Presión\_laboral                          | Nivel de presión relacionado con el trabajo               |
+| CGPA                                      | Promedio general acumulado                                |
+| Satisfacción\_académica                   | Nivel de satisfacción con los estudios                    |
+| Satisfacción\_laboral                     | Nivel de satisfacción con el trabajo                      |
+| Tiempo\_dormir                            | Horas promedio de sueño por día                           |
+| Hábitos\_alimenticios                     | Calidad percibida de los hábitos alimenticios             |
+| Grado\_académico                          | Nivel más alto de educación alcanzado                     |
+| Pensamientos\_suicidas                    | Indicadores de pensamientos suicidas                      |
+| Horas\_estudio/trabajo                    | Promedio de horas dedicadas a estudio o trabajo           |
+| Estrés\_financiero                        | Percepción de presión financiera                          |
+| Antecedente\_familiar\_enfermedad\_mental | Presencia de antecedentes familiares de enfermedad mental |
+| Depresión                                 | Indicador binario de depresión (variable objetivo)        |
+
+
+El análisis de este conjunto de datos permitirá explorar y modelar las relaciones entre las variables predictoras y la variable objetivo, contribuyendo así a un mejor entendimiento del impacto de diversos factores en la salud mental.
+
+## EDA
+```{python}
+#| echo: false
+#| label: librerias
+import numpy as np
+import pandas as pd 
+import matplotlib.pylab as plt 
+import seaborn as sns 
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+sns.set_palette("pastel")
+
+import warnings
+warnings.filterwarnings('ignore')
+```
+
+
+```{python}
+train = pd.read_csv('data/train.csv')
+test = pd.read_csv("data/test.csv")
+# rename columns
+train.columns = [col.lower().replace(" ","_") for col in train.columns]
+test.columns = [col.lower().replace(" ","_") for col in test.columns]
+train.info()
+train.head()
+```
+
+
+##### Revisión de valores nulos
+
+```{python}
+#| echo: false
+#| label: NA check
+
+null_percentage = (train.isnull().sum() / len(train)) * 100
+non_null_percentage = 100 - null_percentage
+percentage_df = pd.DataFrame({
+    'Valores Nulos (%)': null_percentage,
+    'Valores Presentes (%)': non_null_percentage
+})
+# Filtrar solo columnas con valores nulos
+percentage_df = percentage_df[null_percentage > 0]
+# Gráfico apilado
+percentage_df.plot(kind='bar', stacked=True, figsize=(12, 6), color=['red', 'green'])
+plt.title("Porcentaje de Valores Nulos")
+plt.ylabel("Porcentaje (%)")
+plt.xticks(rotation=45)
+plt.legend(loc='upper right')
+plt.show()
+```
+
+vemos que los datos relacionados con estudiantes (Academic Pressure, CGPA y Study Satisfaction) tienen un gran porcentaje de NAs del 80% en sus registros.
+
+```{python}
+#| label: funcio de imputación
+#| echo: false
+def fill_missing_column(df, column, test_df=None):
+    """
+    Llena los valores nulos de una columna específica en un DataFrame.
+
+    Parámetros:
+        df (pd.DataFrame): DataFrame que contiene la columna a procesar.
+        column (str): Nombre de la columna que se desea imputar.
+        test_df (pd.DataFrame, opcional): DataFrame de prueba donde se aplicarán los mismos valores de imputación.
+
+    Retorna:
+        pd.DataFrame: El DataFrame con la columna imputada.
+        pd.DataFrame (opcional): El DataFrame de prueba imputado si se proporciona.
+    """
+    if column not in df.columns:
+        raise ValueError(f"La columna '{column}' no existe en el DataFrame.")
+    
+    if df[column].isnull().sum() == 0:
+        print(f"La columna '{column}' no tiene valores nulos.")
+        return df if test_df is None else (df, test_df)
+
+    # Determinar el valor de imputación
+    if pd.api.types.is_numeric_dtype(df[column]):
+        fill_value = df[column].mean()
+        strategy = 'mean'
+    else:
+        fill_value = df[column].mode()[0]
+        strategy = 'mode'
+
+    # Imputar en el DataFrame principal
+    df[column].fillna(fill_value, inplace=True)
+
+    # Imputar en el DataFrame de prueba si está proporcionado
+    if test_df is not None:
+        if column not in test_df.columns:
+            raise ValueError(f"La columna '{column}' no existe en test_df.")
+        test_df[column].fillna(fill_value, inplace=True)
+
+    if strategy == 'mean':
+        print(f"Columna '{column}' - Valores nulos llenados con {strategy} ({fill_value:.2f}).")
+    else:
+        print(f"Columna '{column}' - Valores nulos llenados con {strategy} ({fill_value}).")
+    
+    return df if test_df is None else (df, test_df)
+```
+
+**Imputación de datos**
+realizaremos una imputación de los datos utlizando la moda para varibales categóricas y media para las variables numéricas.
+
+```{python}
+columns = ['financial_stress','degree','dietary_habits','job_satisfaction','study_satisfaction','profession','academic_pressure','work_pressure','cgpa']
+
+for col in columns:
+    train,test = fill_missing_column(train,col,test)
+```
+
+Ahora analizamos más las variables después del prepsocesamiento que hicimos.
+
+Primero vemos como se ve la variable depresión en la que, observamos que nuestra base está desbalanceada.
+
+```{python}
+target_colors = [
+    "#ae0001",
+    "#6fcb9f",
+]
+plt.figure(figsize=(6, 6))
+plt.pie(
+    train["depression"].value_counts(),
+    labels=train["depression"].value_counts().index,
+    textprops={"fontsize": 15, "color": "black"},
+    colors=target_colors,
+    autopct="%.0f%%",
+    explode=[0.03, 0.03],
+)
+plt.title("Distribución de la variable Depresión", fontsize=14)
+plt.show()
+```
+
+un data set claramente desbalanceado donde podemos tener un benchmark inical de que nuestro _accuray_ debe ser superior a 82%
+
+```{python}
+#| echo: false
+obj_feats = train.select_dtypes(include="object").columns
+fig = plt.figure(figsize=(10, 15))
+
+for i, feature in enumerate(obj_feats):
+    ax = fig.add_subplot(5, 2, i + 1)
+    df_temp = train[feature].value_counts().nlargest(20).reset_index()
+    sns.barplot(df_temp, y=feature, x="count", color="#66b7ee", orient="h", alpha=0.8)
+    ax.bar_label(
+        ax.containers[0], label_type="center", padding=10, color="black", fontsize=8
+    )
+    ax.set_ylabel(feature, fontsize=10)
+    ax.set_xlabel("Counts", fontsize=10)
+    ax.tick_params(axis="both", labelsize=8)
+
+
+fig.tight_layout()
+plt.show()
+```
