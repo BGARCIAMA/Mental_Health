@@ -75,6 +75,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -118,7 +147,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>En este proyecto, abordaremos la tarea de predecir la variable objetivo <strong>Depresión</strong> utilizando un conjunto de datos titulado <strong>Salud Mental</strong>. Este dataset es el resultado de una encuesta integral cuyo propósito fue analizar los factores asociados al riesgo de depresión en adultos. La comprensión de estos factores puede contribuir al desarrollo de intervenciones más efectivas en el ámbito de la salud mental.</p>
+<p>En este proyecto, abordaremos la tarea de predecir la variable objetivo <strong>Depresión</strong> utilizando un conjunto de datos titulado <strong>Salud Mental</strong>[link][https://www.kaggle.com/competitions/playground-series-s4e11/data]. Este dataset es el resultado de una encuesta integral cuyo propósito fue analizar los factores asociados al riesgo de depresión en adultos. La comprensión de estos factores puede contribuir al desarrollo de intervenciones más efectivas en el ámbito de la salud mental.</p>
 <p>La encuesta fue llevada a cabo de manera anónima entre enero y junio de 2023 en diversas ciudades, involucrando a personas de diferentes orígenes y profesiones. Los participantes, con edades entre 18 y 60 años, compartieron voluntariamente información sobre una amplia variedad de aspectos, tales como edad, género, ciudad de residencia, entre otros.</p>
 <p>El conjunto de datos contiene 140,700 registros en el conjunto de entrenamiento y está compuesto por 20 variables, descritas a continuación:</p>
 <table class="caption-top table">
@@ -218,14 +247,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>El análisis de este conjunto de datos permitirá explorar y modelar las relaciones entre las variables predictoras y la variable objetivo, contribuyendo así a un mejor entendimiento del impacto de diversos factores en la salud mental.</p>
 <section id="eda" class="level2">
 <h2 class="anchored" data-anchor-id="eda">EDA</h2>
-<div id="9ae21b0f" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> pd.read_csv(<span class="st">'data/train.csv'</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> pd.read_csv(<span class="st">"data/test.csv"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># rename columns</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>train.columns <span class="op">=</span> [col.lower().replace(<span class="st">" "</span>,<span class="st">"_"</span>) <span class="cf">for</span> col <span class="kw">in</span> train.columns]</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>test.columns <span class="op">=</span> [col.lower().replace(<span class="st">" "</span>,<span class="st">"_"</span>) <span class="cf">for</span> col <span class="kw">in</span> test.columns]</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>train.info()</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>train.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="info" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
 RangeIndex: 140700 entries, 0 to 140699
@@ -255,7 +277,143 @@ Data columns (total 20 columns):
 dtypes: float64(8), int64(2), object(10)
 memory usage: 21.5+ MB</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="2">
+</div>
+<p>El conjunto de entrenamiento consta de 140,700 registros y 20 columnas.</p>
+<p><strong>Variables numéricas</strong></p>
+<div id="9988b110" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="41">
+<style type="text/css">
+</style>
+
+<table id="T_07bb4" class="caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
+<th id="T_07bb4_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">id</th>
+<th id="T_07bb4_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">age</th>
+<th id="T_07bb4_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">academic_pressure</th>
+<th id="T_07bb4_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">work_pressure</th>
+<th id="T_07bb4_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">cgpa</th>
+<th id="T_07bb4_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">study_satisfaction</th>
+<th id="T_07bb4_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">job_satisfaction</th>
+<th id="T_07bb4_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">work/study_hours</th>
+<th id="T_07bb4_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">financial_stress</th>
+<th id="T_07bb4_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">depression</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td id="T_07bb4_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">count</td>
+<td id="T_07bb4_row0_col0" class="data row0 col0">140700.00</td>
+<td id="T_07bb4_row0_col1" class="data row0 col1">140700.00</td>
+<td id="T_07bb4_row0_col2" class="data row0 col2">27897.00</td>
+<td id="T_07bb4_row0_col3" class="data row0 col3">112782.00</td>
+<td id="T_07bb4_row0_col4" class="data row0 col4">27898.00</td>
+<td id="T_07bb4_row0_col5" class="data row0 col5">27897.00</td>
+<td id="T_07bb4_row0_col6" class="data row0 col6">112790.00</td>
+<td id="T_07bb4_row0_col7" class="data row0 col7">140700.00</td>
+<td id="T_07bb4_row0_col8" class="data row0 col8">140696.00</td>
+<td id="T_07bb4_row0_col9" class="data row0 col9">140700.00</td>
+</tr>
+<tr class="even">
+<td id="T_07bb4_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">mean</td>
+<td id="T_07bb4_row1_col0" class="data row1 col0">70349.50</td>
+<td id="T_07bb4_row1_col1" class="data row1 col1">40.39</td>
+<td id="T_07bb4_row1_col2" class="data row1 col2">3.14</td>
+<td id="T_07bb4_row1_col3" class="data row1 col3">3.00</td>
+<td id="T_07bb4_row1_col4" class="data row1 col4">7.66</td>
+<td id="T_07bb4_row1_col5" class="data row1 col5">2.94</td>
+<td id="T_07bb4_row1_col6" class="data row1 col6">2.97</td>
+<td id="T_07bb4_row1_col7" class="data row1 col7">6.25</td>
+<td id="T_07bb4_row1_col8" class="data row1 col8">2.99</td>
+<td id="T_07bb4_row1_col9" class="data row1 col9">0.18</td>
+</tr>
+<tr class="odd">
+<td id="T_07bb4_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">std</td>
+<td id="T_07bb4_row2_col0" class="data row2 col0">40616.74</td>
+<td id="T_07bb4_row2_col1" class="data row2 col1">12.38</td>
+<td id="T_07bb4_row2_col2" class="data row2 col2">1.38</td>
+<td id="T_07bb4_row2_col3" class="data row2 col3">1.41</td>
+<td id="T_07bb4_row2_col4" class="data row2 col4">1.46</td>
+<td id="T_07bb4_row2_col5" class="data row2 col5">1.36</td>
+<td id="T_07bb4_row2_col6" class="data row2 col6">1.42</td>
+<td id="T_07bb4_row2_col7" class="data row2 col7">3.85</td>
+<td id="T_07bb4_row2_col8" class="data row2 col8">1.41</td>
+<td id="T_07bb4_row2_col9" class="data row2 col9">0.39</td>
+</tr>
+<tr class="even">
+<td id="T_07bb4_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">min</td>
+<td id="T_07bb4_row3_col0" class="data row3 col0">0.00</td>
+<td id="T_07bb4_row3_col1" class="data row3 col1">18.00</td>
+<td id="T_07bb4_row3_col2" class="data row3 col2">1.00</td>
+<td id="T_07bb4_row3_col3" class="data row3 col3">1.00</td>
+<td id="T_07bb4_row3_col4" class="data row3 col4">5.03</td>
+<td id="T_07bb4_row3_col5" class="data row3 col5">1.00</td>
+<td id="T_07bb4_row3_col6" class="data row3 col6">1.00</td>
+<td id="T_07bb4_row3_col7" class="data row3 col7">0.00</td>
+<td id="T_07bb4_row3_col8" class="data row3 col8">1.00</td>
+<td id="T_07bb4_row3_col9" class="data row3 col9">0.00</td>
+</tr>
+<tr class="odd">
+<td id="T_07bb4_level0_row4" class="row_heading level0 row4" data-quarto-table-cell-role="th">25%</td>
+<td id="T_07bb4_row4_col0" class="data row4 col0">35174.75</td>
+<td id="T_07bb4_row4_col1" class="data row4 col1">29.00</td>
+<td id="T_07bb4_row4_col2" class="data row4 col2">2.00</td>
+<td id="T_07bb4_row4_col3" class="data row4 col3">2.00</td>
+<td id="T_07bb4_row4_col4" class="data row4 col4">6.29</td>
+<td id="T_07bb4_row4_col5" class="data row4 col5">2.00</td>
+<td id="T_07bb4_row4_col6" class="data row4 col6">2.00</td>
+<td id="T_07bb4_row4_col7" class="data row4 col7">3.00</td>
+<td id="T_07bb4_row4_col8" class="data row4 col8">2.00</td>
+<td id="T_07bb4_row4_col9" class="data row4 col9">0.00</td>
+</tr>
+<tr class="even">
+<td id="T_07bb4_level0_row5" class="row_heading level0 row5" data-quarto-table-cell-role="th">50%</td>
+<td id="T_07bb4_row5_col0" class="data row5 col0">70349.50</td>
+<td id="T_07bb4_row5_col1" class="data row5 col1">42.00</td>
+<td id="T_07bb4_row5_col2" class="data row5 col2">3.00</td>
+<td id="T_07bb4_row5_col3" class="data row5 col3">3.00</td>
+<td id="T_07bb4_row5_col4" class="data row5 col4">7.77</td>
+<td id="T_07bb4_row5_col5" class="data row5 col5">3.00</td>
+<td id="T_07bb4_row5_col6" class="data row5 col6">3.00</td>
+<td id="T_07bb4_row5_col7" class="data row5 col7">6.00</td>
+<td id="T_07bb4_row5_col8" class="data row5 col8">3.00</td>
+<td id="T_07bb4_row5_col9" class="data row5 col9">0.00</td>
+</tr>
+<tr class="odd">
+<td id="T_07bb4_level0_row6" class="row_heading level0 row6" data-quarto-table-cell-role="th">75%</td>
+<td id="T_07bb4_row6_col0" class="data row6 col0">105524.25</td>
+<td id="T_07bb4_row6_col1" class="data row6 col1">51.00</td>
+<td id="T_07bb4_row6_col2" class="data row6 col2">4.00</td>
+<td id="T_07bb4_row6_col3" class="data row6 col3">4.00</td>
+<td id="T_07bb4_row6_col4" class="data row6 col4">8.92</td>
+<td id="T_07bb4_row6_col5" class="data row6 col5">4.00</td>
+<td id="T_07bb4_row6_col6" class="data row6 col6">4.00</td>
+<td id="T_07bb4_row6_col7" class="data row6 col7">10.00</td>
+<td id="T_07bb4_row6_col8" class="data row6 col8">4.00</td>
+<td id="T_07bb4_row6_col9" class="data row6 col9">0.00</td>
+</tr>
+<tr class="even">
+<td id="T_07bb4_level0_row7" class="row_heading level0 row7" data-quarto-table-cell-role="th">max</td>
+<td id="T_07bb4_row7_col0" class="data row7 col0">140699.00</td>
+<td id="T_07bb4_row7_col1" class="data row7 col1">60.00</td>
+<td id="T_07bb4_row7_col2" class="data row7 col2">5.00</td>
+<td id="T_07bb4_row7_col3" class="data row7 col3">5.00</td>
+<td id="T_07bb4_row7_col4" class="data row7 col4">10.00</td>
+<td id="T_07bb4_row7_col5" class="data row7 col5">5.00</td>
+<td id="T_07bb4_row7_col6" class="data row7 col6">5.00</td>
+<td id="T_07bb4_row7_col7" class="data row7 col7">12.00</td>
+<td id="T_07bb4_row7_col8" class="data row7 col8">5.00</td>
+<td id="T_07bb4_row7_col9" class="data row7 col9">1.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>El análisis exploratorio de las variables numéricas revela que las relacionadas con satisfacción, presión y estrés están en una escala de 1 a 5, con medias cercanas a 3. La edad de los participantes oscila entre 18 y 60 años, con una media de 40.4, mientras que las horas de trabajo/estudio tienen una media de 6.25 horas diarias. El rendimiento académico (CGPA) muestra valores altos, con una media de 7.66. La variable objetivo, depression, indica que alrededor del 18% de los participantes presenta riesgo de depresión.</p>
+<p><strong>Variables categóricas</strong></p>
+<div id="896d41b0" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display" data-execution_count="42">
 <div>
 
 
@@ -263,143 +421,70 @@ memory usage: 21.5+ MB</code></pre>
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">id</th>
 <th data-quarto-table-cell-role="th">name</th>
 <th data-quarto-table-cell-role="th">gender</th>
-<th data-quarto-table-cell-role="th">age</th>
 <th data-quarto-table-cell-role="th">city</th>
 <th data-quarto-table-cell-role="th">working_professional_or_student</th>
 <th data-quarto-table-cell-role="th">profession</th>
-<th data-quarto-table-cell-role="th">academic_pressure</th>
-<th data-quarto-table-cell-role="th">work_pressure</th>
-<th data-quarto-table-cell-role="th">cgpa</th>
-<th data-quarto-table-cell-role="th">study_satisfaction</th>
-<th data-quarto-table-cell-role="th">job_satisfaction</th>
 <th data-quarto-table-cell-role="th">sleep_duration</th>
 <th data-quarto-table-cell-role="th">dietary_habits</th>
 <th data-quarto-table-cell-role="th">degree</th>
 <th data-quarto-table-cell-role="th">have_you_ever_had_suicidal_thoughts_?</th>
-<th data-quarto-table-cell-role="th">work/study_hours</th>
-<th data-quarto-table-cell-role="th">financial_stress</th>
 <th data-quarto-table-cell-role="th">family_history_of_mental_illness</th>
-<th data-quarto-table-cell-role="th">depression</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>0</td>
-<td>Aaradhya</td>
-<td>Female</td>
-<td>49.0</td>
-<td>Ludhiana</td>
-<td>Working Professional</td>
-<td>Chef</td>
-<td>NaN</td>
-<td>5.0</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>2.0</td>
-<td>More than 8 hours</td>
-<td>Healthy</td>
-<td>BHM</td>
-<td>No</td>
-<td>1.0</td>
-<td>2.0</td>
-<td>No</td>
-<td>0</td>
+<td data-quarto-table-cell-role="th">count</td>
+<td>140700</td>
+<td>140700</td>
+<td>140700</td>
+<td>140700</td>
+<td>104070</td>
+<td>140700</td>
+<td>140696</td>
+<td>140698</td>
+<td>140700</td>
+<td>140700</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>1</td>
-<td>Vivan</td>
-<td>Male</td>
-<td>26.0</td>
-<td>Varanasi</td>
-<td>Working Professional</td>
-<td>Teacher</td>
-<td>NaN</td>
-<td>4.0</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>3.0</td>
-<td>Less than 5 hours</td>
-<td>Unhealthy</td>
-<td>LLB</td>
-<td>Yes</td>
-<td>7.0</td>
-<td>3.0</td>
-<td>No</td>
-<td>1</td>
+<td data-quarto-table-cell-role="th">unique</td>
+<td>422</td>
+<td>2</td>
+<td>98</td>
+<td>2</td>
+<td>64</td>
+<td>36</td>
+<td>23</td>
+<td>115</td>
+<td>2</td>
+<td>2</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>2</td>
-<td>Yuvraj</td>
+<td data-quarto-table-cell-role="th">top</td>
+<td>Rohan</td>
 <td>Male</td>
-<td>33.0</td>
-<td>Visakhapatnam</td>
-<td>Student</td>
-<td>NaN</td>
-<td>5.0</td>
-<td>NaN</td>
-<td>8.97</td>
-<td>2.0</td>
-<td>NaN</td>
-<td>5-6 hours</td>
-<td>Healthy</td>
-<td>B.Pharm</td>
-<td>Yes</td>
-<td>3.0</td>
-<td>1.0</td>
-<td>No</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
-<td>3</td>
-<td>Yuvraj</td>
-<td>Male</td>
-<td>22.0</td>
-<td>Mumbai</td>
+<td>Kalyan</td>
 <td>Working Professional</td>
 <td>Teacher</td>
-<td>NaN</td>
-<td>5.0</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>1.0</td>
 <td>Less than 5 hours</td>
 <td>Moderate</td>
-<td>BBA</td>
-<td>Yes</td>
-<td>10.0</td>
-<td>1.0</td>
-<td>Yes</td>
-<td>1</td>
+<td>Class 12</td>
+<td>No</td>
+<td>No</td>
 </tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">4</td>
-<td>4</td>
-<td>Rhea</td>
-<td>Female</td>
-<td>30.0</td>
-<td>Kanpur</td>
-<td>Working Professional</td>
-<td>Business Analyst</td>
-<td>NaN</td>
-<td>1.0</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>1.0</td>
-<td>5-6 hours</td>
-<td>Unhealthy</td>
-<td>BBA</td>
-<td>Yes</td>
-<td>9.0</td>
-<td>4.0</td>
-<td>Yes</td>
-<td>0</td>
+<tr class="even">
+<td data-quarto-table-cell-role="th">freq</td>
+<td>3178</td>
+<td>77464</td>
+<td>6591</td>
+<td>112799</td>
+<td>24906</td>
+<td>38784</td>
+<td>49705</td>
+<td>14729</td>
+<td>71138</td>
+<td>70758</td>
 </tr>
 </tbody>
 </table>
@@ -407,71 +492,280 @@ memory usage: 21.5+ MB</code></pre>
 </div>
 </div>
 </div>
-<section id="revisión-de-valores-nulos" class="level5">
-<h5 class="anchored" data-anchor-id="revisión-de-valores-nulos">Revisión de valores nulos</h5>
-<p>::: {#cell-NA check .cell execution_count=3}</p>
+<p>En cuanto a las variables categóricas, destacan 98 ciudades únicas y 64 profesiones, con “Teacher” como la más común. Duraciones de sueño como “Less than 5 hours” son las más reportadas, mientras que los antecedentes familiares de enfermedad mental y pensamientos suicidas tienen predominancia de respuestas negativas. Estos resultados iniciales subrayan la diversidad del dataset y señalan áreas clave para el tratamiento de datos, como los valores nulos y categorías con alta cardinalidad.</p>
+<section id="variable-objetivo" class="level4">
+<h4 class="anchored" data-anchor-id="variable-objetivo">Variable Objetivo</h4>
+<p>::: {#cell-target variable dist .cell execution_count=6}</p>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="reporte_files/figure-html/na-check-output-1.png" id="na-check" width="965" height="592" class="figure-img"></p>
+<p><img src="reporte_files/figure-html/target-variable-dist-output-1.png" id="target-variable-dist" width="463" height="486" class="figure-img"></p>
 </figure>
 </div>
 </div>
 <p>:::</p>
-<p>vemos que los datos relacionados con estudiantes (Academic Pressure, CGPA y Study Satisfaction) tienen un gran porcentaje de NAs del 80% en sus registros.</p>
-<p><strong>Imputación de datos</strong> realizaremos una imputación de los datos utlizando la moda para varibales categóricas y media para las variables numéricas.</p>
-<div id="a3178b03" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>columns <span class="op">=</span> [<span class="st">'financial_stress'</span>,<span class="st">'degree'</span>,<span class="st">'dietary_habits'</span>,<span class="st">'job_satisfaction'</span>,<span class="st">'study_satisfaction'</span>,<span class="st">'profession'</span>,<span class="st">'academic_pressure'</span>,<span class="st">'work_pressure'</span>,<span class="st">'cgpa'</span>]</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> columns:</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    train,test <span class="op">=</span> fill_missing_column(train,col,test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>El análisis de la variable objetivo depression revela un conjunto de datos desbalanceado, donde aproximadamente el 82% de los registros corresponden a individuos sin depresión y solo el 18% a casos positivos. Esta desigualdad es visualmente evidente en la gráfica de distribución.</p>
+<p>El desbalance en la variable objetivo establece un desafío en el modelado predictivo, ya que los modelos pueden inclinarse hacia la clase mayoritaria. Sin embargo, también sugiere que un punto de referencia inicial para la métrica de precisión (accuracy) debe superar el 82%, ya que ese sería el desempeño esperado al predecir siempre la clase mayoritaria.</p>
+<section id="revisión-de-valores-nulos" class="level5">
+<h5 class="anchored" data-anchor-id="revisión-de-valores-nulos">Revisión de valores nulos</h5>
+<p>::: {#cell-NA check .cell execution_count=7}</p>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="reporte_files/figure-html/na-check-output-1.png" id="na-check" width="675" height="592" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<p>:::</p>
+<p>En particular, las variables relacionadas con estudiantes, como academic_pressure, cgpa, y study_satisfaction, presentan hasta un 80% de valores nulos. Este resultado refleja una menor representación de estudiantes en comparación con profesionistas dentro del dataset.</p>
+<p>A pesar del alto porcentaje de valores faltantes en estas variables, no se eliminarán del análisis, ya que contienen información valiosa para los casos específicos de estudiantes. Este enfoque permite preservar datos que pueden ser relevantes en el desarrollo del modelo predictivo, especialmente para evaluar las diferencias entre grupos ocupacionales. Las estrategias de imputación y tratamiento de valores nulos serán fundamentales para garantizar la calidad del análisis posterior.</p>
+</section>
+</section>
+<section id="ingenieria-de-variables" class="level4">
+<h4 class="anchored" data-anchor-id="ingenieria-de-variables">Ingenieria de Variables</h4>
+<p>Se añadieron características derivadas para enriquecer el dataset y mejorar el análisis. Estas incluyen:</p>
+<ul>
+<li>satisfaction_by_work: Relación entre presión laboral y satisfacción en el trabajo.</li>
+<li>satisfaction_by_study: Relación entre presión y satisfacción académica.</li>
+<li>age_work_satisfaction: Razón entre edad y satisfacción laboral.</li>
+<li>cgpa_study: Relación entre promedio académico y presión académica.</li>
+</ul>
+<p>Estas nuevas variables buscan capturar interacciones clave, como el impacto de la presión en la satisfacción o el desempeño bajo diferentes condiciones, y tienen el potencial de mejorar el modelo predictivo. Las varibales se crean con la siguiente función:</p>
+<div id="new-feats" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> new_feats(df):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> (</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        df.assign(satisfaction_by_work<span class="op">=</span>df[<span class="st">"work_pressure"</span>] <span class="op">/</span> df[<span class="st">"job_satisfaction"</span>])</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        .assign(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>            satisfaction_by_study<span class="op">=</span>df[<span class="st">"academic_pressure"</span>] <span class="op">/</span> df[<span class="st">"study_satisfaction"</span>]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        .assign(age_work_satisfaction<span class="op">=</span>df[<span class="st">"age"</span>] <span class="op">/</span> df[<span class="st">"job_satisfaction"</span>])</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        .assign(cgpa_study<span class="op">=</span>df[<span class="st">"cgpa"</span>] <span class="op">/</span> df[<span class="st">"academic_pressure"</span>])</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> new_feats(train).copy()</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> new_feats(test).copy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Dado que algunas variables categóricas presentan un gran número de categorías únicas, se implementó una estrategia para agrupar las categorías menos representativas en una etiqueta denominada “Other”. Esto asegura que las categorías seleccionadas representen al menos el 90% de los datos, reduciendo la dimensionalidad y facilitando el análisis.</p>
+<p>Las columnas ajustadas incluyen:</p>
+<ul>
+<li>city</li>
+<li>profession</li>
+<li>sleep_duration</li>
+<li>dietary_habits</li>
+<li>degree</li>
+</ul>
+<p>Esta transformación permite simplificar la estructura del dataset sin perder información relevante, mejorando la manejabilidad del modelo y reduciendo el riesgo de sobreajuste debido a categorías con baja frecuencia.</p>
+<div id="75650a7c" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>train[<span class="st">"city"</span>], test[<span class="st">"city"</span>] <span class="op">=</span> group_low_frequency(train, test, <span class="st">'city'</span>, <span class="fl">0.9</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>train[<span class="st">"profession"</span>], test[<span class="st">"profession"</span>] <span class="op">=</span> group_low_frequency(train, test, <span class="st">'profession'</span>, <span class="fl">0.9</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>train[<span class="st">"sleep_duration"</span>], test[<span class="st">"sleep_duration"</span>] <span class="op">=</span> group_low_frequency(train, test, <span class="st">'sleep_duration'</span>, <span class="fl">0.9</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>train[<span class="st">"dietary_habits"</span>], test[<span class="st">"dietary_habits"</span>] <span class="op">=</span> group_low_frequency(train, test, <span class="st">'dietary_habits'</span>, <span class="fl">0.9</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>train[<span class="st">"degree"</span>], test[<span class="st">"degree"</span>] <span class="op">=</span> group_low_frequency(train, test, <span class="st">'degree'</span>, <span class="fl">0.9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Tras la agrupación, las variables categóricas principales quedan resumidas con las categorías más representativas</p>
+<div id="41c85b39" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display" data-execution_count="48">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">city</th>
+<th data-quarto-table-cell-role="th">profession</th>
+<th data-quarto-table-cell-role="th">sleep_duration</th>
+<th data-quarto-table-cell-role="th">dietary_habits</th>
+<th data-quarto-table-cell-role="th">degree</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>140700</td>
+<td>140700</td>
+<td>140700</td>
+<td>140700</td>
+<td>140700</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">unique</td>
+<td>26</td>
+<td>27</td>
+<td>4</td>
+<td>3</td>
+<td>23</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">top</td>
+<td>Other</td>
+<td>Other</td>
+<td>Less than 5 hours</td>
+<td>Moderate</td>
+<td>Other</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">freq</td>
+<td>17198</td>
+<td>47065</td>
+<td>38784</td>
+<td>49705</td>
+<td>15386</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<section id="relación-variables-categóricas-y-depresión" class="level5">
+<h5 class="anchored" data-anchor-id="relación-variables-categóricas-y-depresión">Relación variables categóricas y Depresión</h5>
+<div id="b7b9d55c" class="cell" data-execution_count="13">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="reporte_files/figure-html/cell-13-output-1.png" width="1499" height="165" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>El análisis gráfico de la variable work/study_hours muestra un patrón interesante: a medida que aumentan las horas dedicadas al trabajo o estudio, también aumenta la proporción de casos con indicadores de depresión.</p>
+<div id="4efb813c" class="cell" data-execution_count="14">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="reporte_files/figure-html/cell-14-output-1.png" width="730" height="165" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Los resultados muestran que más de la mitad de los estudiantes en el dataset tienen indicadores de depresión. Esto resalta una diferencia notable en comparación con los profesionales, sugiriendo que el entorno académico puede ser un factor de estrés significativo.</p>
+<div id="be99ef5e" class="cell" data-execution_count="15">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="reporte_files/figure-html/cell-15-output-1.png" width="731" height="165" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Aunque hay más hombres con depresión en términos absolutos, los porcentajes de depresión entre hombres y mujeres son similares, alrededor del 18%. Esto indica que la distribución de la variable objetivo no presenta un sesgo significativo entre géneros.</p>
+<div id="7ce410c8" class="cell" data-execution_count="16">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="reporte_files/figure-html/cell-16-output-1.png" width="733" height="162" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Se observa una clara relación inversa entre la satisfacción en los estudios y la propensión a la depresión. A menor satisfacción académica, mayor es la proporción de casos positivos de depresión, lo que refuerza la importancia del bienestar en el ámbito educativo.</p>
+</section>
+<section id="mapa-de-correlación-entre-variable-numéricas" class="level5">
+<h5 class="anchored" data-anchor-id="mapa-de-correlación-entre-variable-numéricas">Mapa de correlación entre variable numéricas</h5>
+<div id="b8662241" class="cell" data-execution_count="17">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="reporte_files/figure-html/cell-17-output-1.png" width="834" height="747" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="modelos" class="level2">
+<h2 class="anchored" data-anchor-id="modelos">Modelos</h2>
+<section id="catboost" class="level3">
+<h3 class="anchored" data-anchor-id="catboost">CatBoost</h3>
+<p>CatBoost es un algoritmo de aprendizaje automático basado en árboles de decisión que utiliza técnicas avanzadas de boosting. Es especialmente útil para trabajar con datos categóricos, ya que implementa un manejo eficiente de estas variables mediante codificación automática, lo que reduce la necesidad de preprocesamiento adicional. Además, CatBoost es conocido por su capacidad de minimizar el riesgo de sobreajuste y su alto desempeño en tareas de clasificación y regresión.</p>
+<p>Elegimos CatBoost para este ejercicio debido a la naturaleza del dataset, que contiene una combinación de variables numéricas y categóricas. Su capacidad para procesar variables categóricas de forma nativa, junto con su robustez frente al desbalance de datos, lo hace ideal para predecir nuestra variable objetivo, <strong>depression</strong>, en un conjunto de datos con estructuras y distribuciones complejas. Además, el rendimiento competitivo de CatBoost en comparación con otros algoritmos de boosting lo convierte en una opción sólida para este tipo de problema.</p>
+<p>Para entrenar el modelo, el dataset se preprocesó llenando valores faltantes con “0” y ajustando los tipos de datos según la naturaleza de las variables (numéricas, categóricas y objetivo). Posteriormente, se dividieron los datos en conjuntos de entrenamiento y prueba, utilizando el 70% de los datos para entrenamiento y el 30% para prueba. Este procedimiento garantiza una evaluación justa del modelo, preservando datos no vistos para validar su desempeño y evitar el sobreajuste.</p>
+<div id="catboost" class="cell" data-execution_count="19">
 <div class="cell-output cell-output-stdout">
-<pre><code>Columna 'financial_stress' - Valores nulos llenados con mean (2.99).
-Columna 'degree' - Valores nulos llenados con mode (Class 12).
-Columna 'dietary_habits' - Valores nulos llenados con mode (Moderate).
-Columna 'job_satisfaction' - Valores nulos llenados con mean (2.97).
-Columna 'study_satisfaction' - Valores nulos llenados con mean (2.94).
-Columna 'profession' - Valores nulos llenados con mode (Teacher).
-Columna 'academic_pressure' - Valores nulos llenados con mean (3.14).
-Columna 'work_pressure' - Valores nulos llenados con mean (3.00).
-Columna 'cgpa' - Valores nulos llenados con mean (7.66).</code></pre>
+<pre><code>----------X Shape---------
+(140700, 23)
+*************************************
+----------y Shape------------
+(140700,)</code></pre>
 </div>
 </div>
-<p>Ahora analizamos más las variables después del prepsocesamiento que hicimos.</p>
-<p>Primero vemos como se ve la variable depresión en la que, observamos que nuestra base está desbalanceada.</p>
-<div id="92db0ac2" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>target_colors <span class="op">=</span> [</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"#ae0001"</span>,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"#6fcb9f"</span>,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">6</span>))</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>plt.pie(</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    train[<span class="st">"depression"</span>].value_counts(),</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>train[<span class="st">"depression"</span>].value_counts().index,</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    textprops<span class="op">=</span>{<span class="st">"fontsize"</span>: <span class="dv">15</span>, <span class="st">"color"</span>: <span class="st">"black"</span>},</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    colors<span class="op">=</span>target_colors,</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    autopct<span class="op">=</span><span class="st">"%.0f</span><span class="sc">%%</span><span class="st">"</span>,</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    explode<span class="op">=</span>[<span class="fl">0.03</span>, <span class="fl">0.03</span>],</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Distribución de la variable Depresión"</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="reporte_files/figure-html/cell-7-output-1.png" width="463" height="486" class="figure-img"></p>
-</figure>
+<p>En este paso, utilizamos Optuna, una biblioteca eficiente para la optimización de hiperparámetros, con el objetivo de encontrar la mejor configuración para el modelo de CatBoostClassifier. La función de optimización busca maximizar el desempeño del modelo en términos de precisión (accuracy) utilizando un enfoque basado en validación cruzada. Espacio de Búsqueda</p>
+<p>El espacio de búsqueda incluye los siguientes hiperparámetros:</p>
+<div id="b0d6c321" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> objective(trial):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Espacio de búsqueda para los hiperparámetros</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'iterations'</span>: trial.suggest_int(<span class="st">'iterations'</span>, <span class="dv">100</span>, <span class="dv">1000</span>),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'learning_rate'</span>: trial.suggest_float(<span class="st">'learning_rate'</span>, <span class="fl">0.01</span>, <span class="fl">0.3</span>),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'depth'</span>: trial.suggest_int(<span class="st">'depth'</span>, <span class="dv">4</span>, <span class="dv">10</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'colsample_bylevel'</span>: trial.suggest_float(<span class="st">'colsample_bylevel'</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'subsample'</span>: trial.suggest_float(<span class="st">'subsample'</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'min_data_in_leaf'</span>: trial.suggest_int(<span class="st">'min_data_in_leaf'</span>, <span class="dv">1</span>, <span class="dv">10</span>),</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'l2_leaf_reg'</span>: trial.suggest_float(<span class="st">'l2_leaf_reg'</span>, <span class="fl">1.0</span>, <span class="fl">20.0</span>),</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'random_strength'</span>: trial.suggest_float(<span class="st">'random_strength'</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>),</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Modelo de CatBoost</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> CatBoostClassifier(<span class="op">**</span>params, cat_features<span class="op">=</span><span class="bu">list</span>(obj_feats), verbose<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Evaluación usando validación cruzada</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    score <span class="op">=</span> cross_val_score(model, X_train, y_train, cv<span class="op">=</span><span class="dv">3</span>, scoring<span class="op">=</span><span class="st">'accuracy'</span>).mean()</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> score</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Función Objetivo</p>
+<p>La función objetivo se define como el promedio de la precisión obtenida mediante validación cruzada con 3 particiones (<span class="math inline">\(k=3\)</span>):</p>
+<p><span class="math display">\[\text{Score} = \frac{1}{k} \sum_{i=1}^{k} \text{Accuracy}(i)\]</span></p>
+<p>Donde <span class="math inline">\(\text{Accuracy}(i)\)</span> es la precisión en el <span class="math inline">\(i\)</span>-ésimo fold de la validación cruzada. El modelo de CatBoost se entrena y evalúa en cada iteración con una combinación específica de hiperparámetros sugerida por Optuna.</p>
+<div id="fd0d80cf" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>best_params <span class="op">=</span> {<span class="st">'iterations'</span>: <span class="dv">633</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a> <span class="st">'learning_rate'</span>: <span class="fl">0.18918646362839026</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a> <span class="st">'depth'</span>: <span class="dv">4</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a> <span class="st">'colsample_bylevel'</span>: <span class="fl">0.9909843814690833</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a> <span class="st">'subsample'</span>: <span class="fl">0.9778634549619083</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a> <span class="st">'min_data_in_leaf'</span>: <span class="dv">1</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a> <span class="st">'l2_leaf_reg'</span>: <span class="fl">10.504885456201343</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a> <span class="st">'random_strength'</span>: <span class="fl">0.664861942866057</span>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div id="catboost-run" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>cat_interp <span class="op">=</span> CatBoostClassifier(<span class="op">**</span>best_params, verbose<span class="op">=</span><span class="va">True</span>, cat_features<span class="op">=</span>X[obj_feats].columns.values, early_stopping_rounds<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>cat_cv_last <span class="op">=</span> StratifiedKFold(<span class="dv">20</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>cat_cv_splits <span class="op">=</span> cat_cv_last.split(X, y)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>acc_scores <span class="op">=</span> []</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>last_test_df_preds <span class="op">=</span> []</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>cat_features <span class="op">=</span> X[obj_feats].columns.values</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>X[cat_features] <span class="op">=</span> X[cat_features].fillna(<span class="st">'nan'</span>).astype(<span class="bu">str</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>X_test_df_pool <span class="op">=</span> Pool(test, cat_features<span class="op">=</span>X[obj_feats].columns.values)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (full_train_idx, valid_idx) <span class="kw">in</span> <span class="bu">enumerate</span>(cat_cv_splits):</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    model_fold <span class="op">=</span> CatBoostClassifier(<span class="op">**</span>best_params)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    X_train_fold, X_valid_fold <span class="op">=</span> X.loc[full_train_idx], X.loc[valid_idx]</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    y_train_fold, y_valid_fold <span class="op">=</span> y.loc[full_train_idx], y.loc[valid_idx]</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    X_train_pool <span class="op">=</span> Pool(X_train_fold, y_train_fold, cat_features<span class="op">=</span>X[obj_feats].columns.values)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    X_valid_pool <span class="op">=</span> Pool(X_valid_fold, y_valid_fold, cat_features<span class="op">=</span>X[obj_feats].columns.values)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    model_fold.fit(X<span class="op">=</span>X_train_pool, eval_set<span class="op">=</span>X_valid_pool, verbose<span class="op">=</span><span class="va">False</span>, early_stopping_rounds<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    valid_pred <span class="op">=</span> model_fold.predict(X_valid_pool)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    score <span class="op">=</span> accuracy_score(y_valid_fold, valid_pred)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    acc_scores.append(score)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    test_df_pred <span class="op">=</span> model_fold.predict_proba(X_test_df_pool)[:, <span class="dv">1</span>]</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    last_test_df_preds.append(test_df_pred)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'Fold </span><span class="sc">{</span>i <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="ss"> Accuracy Score: </span><span class="sc">{</span>score<span class="sc">}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>un data set claramente desbalanceado donde podemos tener un benchmark inical de que nuestro <em>accuray</em> debe ser superior a 82%</p>
-<div id="fd97762a" class="cell" data-execution_count="7">
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="reporte_files/figure-html/cell-8-output-1.png" width="951" height="1430" class="figure-img"></p>
-</figure>
-</div>
-</div>
+<p>Fold 1 Accuracy Score: 0.9383</p>
+<p>Fold 2 Accuracy Score: 0.9420</p>
+<p>Fold 3 Accuracy Score: 0.9375</p>
+<p>Fold 4 Accuracy Score: 0.9389</p>
+<p>Fold 5 Accuracy Score: 0.9419</p>
+<p>Fold 6 Accuracy Score: 0.9407</p>
+<p>Fold 7 Accuracy Score: 0.9396</p>
+<p>Fold 8 Accuracy Score: 0.9429</p>
+<p>Fold 9 Accuracy Score: 0.9403</p>
+<p>Fold 10 Accuracy Score: 0.9395</p>
+<div id="3487af9c" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_valid_fold, valid_pred))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
