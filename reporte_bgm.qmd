@@ -49,7 +49,7 @@ Dado que la variable objetivo está desbalanceada, la precisión proporcionará 
 
 ### 2.1. Características del dataset
 
-El conjunto de datos contiene 140,700 registros en el conjunto de entrenamiento y está compuesto por 20 variables, descritas a continuación:
+El conjunto de dataset está compuesto por 20 variables, descritas a continuación:
 
 | Variable                                  | Descripción                                               |
 | ----------------------------------------- | --------------------------------------------------------- |
@@ -90,6 +90,8 @@ import warnings
 warnings.filterwarnings('ignore')
 ```
 
+### 2.2. Shape de los datasets
+
 ```{python}
 #| echo: false
 #| label: info
@@ -98,29 +100,44 @@ test = pd.read_csv("data/test.csv")
 # rename columns
 train.columns = [col.lower().replace(" ","_") for col in train.columns]
 test.columns = [col.lower().replace(" ","_") for col in test.columns]
-train.info()
+#train.info()
+#test.info()
 ```
+La forma de los datasets de entrenamiento y test tienen la siguiente estructura:
 
-El conjunto de entrenamiento consta de 140,700 registros y 20 columnas.
+| Dataset             | Rows           | Columns        |
+| ------------------- | -------------- | -------------- |
+| Train               | 140700         | 20             |
+| Test                | 93800          | 19             |
+
+El conjunto de test no incluye la variable objetivo para la predicción.
+
+### 2.3. Variables y tipo de datos
 
 **Variables numéricas**
+
 ```{python}
 #| echo: false
 train.describe().round(2).style.format(precision=2)
 ```
-El análisis exploratorio de las variables numéricas revela que las relacionadas con satisfacción, presión y estrés están en una escala de 1 a 5, con medias cercanas a 3. La edad de los participantes oscila entre 18 y 60 años, con una media de 40.4, mientras que las horas de trabajo/estudio tienen una media de 6.25 horas diarias. El rendimiento académico (CGPA) muestra valores altos, con una media de 7.66. La variable objetivo, depression, indica que alrededor del 18% de los participantes presenta riesgo de depresión.
 
+- El análisis exploratorio de las variables numéricas revela que las relacionadas con satisfacción, presión y estrés están en una escala de 1 a 5, con medias cercanas a 3. 
+- La edad de los participantes oscila entre 18 y 60 años, con una media de 40.4, mientras que las horas de trabajo/estudio tienen una media de 6.25 horas diarias. 
+- El rendimiento académico (CGPA) muestra valores altos, con una media de 7.66. La variable objetivo, depression, indica que alrededor del 18% de los participantes presenta riesgo de depresión.
 
 **Variables categóricas**
+
 ```{python}
 #| echo: false
 train.describe(include="object")
 ```
 
-En cuanto a las variables categóricas, destacan 98 ciudades únicas y 64 profesiones, con "Teacher" como la más común. Duraciones de sueño como "Less than 5 hours" son las más reportadas, mientras que los antecedentes familiares de enfermedad mental y pensamientos suicidas tienen predominancia de respuestas negativas. Estos resultados iniciales subrayan la diversidad del dataset y señalan áreas clave para el tratamiento de datos, como los valores nulos y categorías con alta cardinalidad.
+- En cuanto a las variables categóricas, destacan 98 ciudades únicas y 64 profesiones, con "Teacher" como la más común. 
+- Duraciones de sueño como "Less than 5 hours" son las más reportadas, mientras que los antecedentes familiares de enfermedad mental y pensamientos suicidas tienen predominancia de respuestas negativas. 
+- Estos resultados iniciales subrayan la diversidad del dataset y señalan áreas clave para el tratamiento de datos, como los valores nulos y categorías con alta cardinalidad.
 
+### 2.4. Descripción de Variable objetivo
 
-#### Variable Objetivo
 ```{python}
 #| echo: false
 #| label: target variable dist
@@ -141,13 +158,11 @@ plt.title("Distribución de la variable Depresión", fontsize=14)
 plt.show()
 ```
 
+- El análisis de la variable objetivo depression revela un conjunto de datos desbalanceado, donde aproximadamente el 82% de los registros corresponden a individuos sin depresión y solo el 18% a casos positivos. Esta desigualdad es visualmente evidente en la gráfica de distribución.
 
-El análisis de la variable objetivo depression revela un conjunto de datos desbalanceado, donde aproximadamente el 82% de los registros corresponden a individuos sin depresión y solo el 18% a casos positivos. Esta desigualdad es visualmente evidente en la gráfica de distribución.
+- El desbalance en la variable objetivo establece un desafío en el modelado predictivo, ya que los modelos pueden inclinarse hacia la clase mayoritaria. Sin embargo, también sugiere que un punto de referencia inicial para la métrica de precisión (accuracy) debe superar el 82%, ya que ese sería el desempeño esperado al predecir siempre la clase mayoritaria.
 
-El desbalance en la variable objetivo establece un desafío en el modelado predictivo, ya que los modelos pueden inclinarse hacia la clase mayoritaria. Sin embargo, también sugiere que un punto de referencia inicial para la métrica de precisión (accuracy) debe superar el 82%, ya que ese sería el desempeño esperado al predecir siempre la clase mayoritaria.
-
-
-##### Revisión de valores nulos
+### 2.5. Valores Nulos
 
 ```{python}
 #| echo: false
@@ -170,12 +185,21 @@ plt.legend(loc='upper right')
 plt.show()
 ```
 
-En particular, las variables relacionadas con estudiantes, como academic_pressure, cgpa, y study_satisfaction, presentan hasta un 80% de valores nulos. Este resultado refleja una menor representación de estudiantes en comparación con profesionistas dentro del dataset.
+- En particular, las variables relacionadas con estudiantes, como academic_pressure, cgpa, y study_satisfaction, presentan hasta un 80% de valores nulos. Este resultado refleja una menor representación de estudiantes en comparación con profesionistas dentro del dataset.
 
-A pesar del alto porcentaje de valores faltantes en estas variables, no se eliminarán del análisis, ya que contienen información valiosa para los casos específicos de estudiantes. Este enfoque permite preservar datos que pueden ser relevantes en el desarrollo del modelo predictivo, especialmente para evaluar las diferencias entre grupos ocupacionales. Las estrategias de imputación y tratamiento de valores nulos serán fundamentales para garantizar la calidad del análisis posterior.
+- A pesar del alto porcentaje de valores faltantes en estas variables, no se eliminarán del análisis, ya que contienen información valiosa para los casos específicos de estudiantes. Este enfoque permite preservar datos que pueden ser relevantes en el desarrollo del modelo predictivo, especialmente para evaluar las diferencias entre grupos ocupacionales. 
+
+- Las estrategias de imputación y tratamiento de valores nulos serán fundamentales para garantizar la calidad del análisis posterior.
+
+### 2.6. Visualizaciones
 
 
-#### Ingenieria de Variables
+
+
+## 3. Preprocesamiento de datos
+
+### 3.1 Ingenieria de Variables
+
 Se añadieron características derivadas para enriquecer el dataset y mejorar el análisis. Estas incluyen:
 
 * satisfaction_by_work: Relación entre presión laboral y satisfacción en el trabajo.
@@ -184,6 +208,7 @@ Se añadieron características derivadas para enriquecer el dataset y mejorar el
 * cgpa_study: Relación entre promedio académico y presión académica.
 
 Estas nuevas variables buscan capturar interacciones clave, como el impacto de la presión en la satisfacción o el desempeño bajo diferentes condiciones, y tienen el potencial de mejorar el modelo predictivo. Las varibales se crean con la siguiente función:
+
 ```{python}
 #| label: new feats
 def new_feats(df):
@@ -267,7 +292,7 @@ Tras la agrupación, las variables categóricas principales quedan resumidas con
 train[["city","profession","sleep_duration","dietary_habits","degree"]].describe(include="object")
 ```
 
-##### Relación variables categóricas y Depresión
+### 3.2 Relación variables categóricas y Depresión
 
 ```{python}
 #| echo: false
@@ -324,7 +349,8 @@ catplt(x_var="study_satisfaction")
 Se observa una clara relación inversa entre la satisfacción en los estudios y la propensión a la depresión. A menor satisfacción académica, mayor es la proporción de casos positivos de depresión, lo que refuerza la importancia del bienestar en el ámbito educativo.
 
 
-##### Mapa de correlación entre variable numéricas
+### 3.3 Mapa de correlación entre variable numéricas
+
 ```{python}
 #| echo: false
 plt.style.use("default")
@@ -350,7 +376,8 @@ plt.show()
 ```
 
 
-## Modelos
+## 4. Algoritmos y Modelado
+
 ```{python}
 #| echo: false
 #| label: Sklearn libraries
@@ -363,7 +390,8 @@ from sklearn.model_selection import (
 from catboost import CatBoostClassifier, Pool
 from sklearn.linear_model import LogisticRegression
 ```
-### CatBoost
+
+### 4.1 CatBoost
 
 CatBoost es un algoritmo de aprendizaje automático basado en árboles de decisión que utiliza técnicas avanzadas de boosting. Es especialmente útil para trabajar con datos categóricos, ya que implementa un manejo eficiente de estas variables mediante codificación automática, lo que reduce la necesidad de preprocesamiento adicional. Además, CatBoost es conocido por su capacidad de minimizar el riesgo de sobreajuste y su alto desempeño en tareas de clasificación y regresión.
 
