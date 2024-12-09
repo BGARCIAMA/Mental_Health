@@ -20,15 +20,37 @@ cache: true
 ## 1. Definición del proyecto
 
 ### 1.1. Introducción
-La depresión es un trastorno mental común que afecta a millones de personas en todo el mundo. Identificar y comprender los factores que contribuyen al riesgo de depresión es fundamental para desarrollar estrategias efectivas de prevención y tratamiento. El aprendizaje de máquina ofrece una oportunidad para analizar y predecir la depresión en adultos, utilizando datos recopilados de encuestas y cuestionarios.
 
-### 1.2. Descripción general
+La depresión es un trastorno del estado de ánimo que afecta cómo una persona se siente, piensa y maneja las actividades diarias, como dormir, comer o trabajar. Va más allá de sentirse triste o desanimado ocasionalmente; es una condición persistente que puede durar semanas, meses o incluso años.
+
+Algunos síntomas comunes de la depresión van desde los emocionales hasta los físicos y cognitivos, y pueden variar en intensidad de una persona a otra. Algunos de los síntomas más comunes incluyen:
+
+- Emocionales:
+  - Tristeza profunda o sensación de vacío.
+  - Pérdida de interés o placer en actividades que solían disfrutarse.
+  - Sentimientos de culpa, inutilidad o desesperanza.
+- Físicos:
+  - Cambios en el apetito o el peso.
+  - Problemas de sueño (insomnio o dormir en exceso).
+  - Fatiga constante o falta de energía.
+- Cognitivos:
+  - Dificultad para concentrarse, pensar o tomar decisiones.
+  - Pensamientos recurrentes de muerte o suicidio.
+
+Según la OMS (Organización Mundial de la Salud), la depresión es una de las principales causas de discapacidad en todo el mundo y afecta a personas de todas las edades. Aproximadamente el 5% de los adultos en todo el mundo padecen depresión, lo que equivale a cerca de 280 millones de personas. La depresión es más frecuente en mujeres (6%) que en hombres (4%). En 2020, se estimó que más de 264 millones de personas en todo el mundo padecían depresión, lo que representa un aumento del 18% en la última década. La depresión puede tener un impacto significativo en la calidad de vida de las personas, afectando su bienestar emocional, social y físico.
+
+Es esencial promover la detección temprana y el acceso a tratamientos efectivos para reducir el impacto de la depresión en la sociedad. El aprendizaje de máquina ofrece una oportunidad para analizar y predecir la depresión en adultos, utilizando datos recopilados de encuestas y cuestionarios.
+
+### 1.2. Descripción general del proyecto
+
 En este proyecto, abordaremos la tarea de predecir la variable objetivo **Depresión** utilizando un conjunto de datos titulado **Salud Mental**[link][https://www.kaggle.com/competitions/playground-series-s4e11/data]. Este dataset es el resultado de una encuesta integral cuyo propósito fue analizar los factores asociados al riesgo de depresión en adultos. La encuesta incluyó preguntas sobre diversos aspectos de la vida de los participantes, como presión académica, satisfacción laboral, hábitos de sueño y alimentación, entre otros.
 
 La encuesta fue llevada a cabo de manera anónima entre enero y junio de 2023 en diversas ciudades, involucrando a personas de diferentes orígenes y profesiones. 
+
 Los participantes, con edades entre 18 y 60 años, compartieron voluntariamente información sobre una amplia variedad de aspectos, tales como edad, género, ciudad de residencia, entre otros.
 
 ### 1.3. Objetivos
+
 El análisis de este conjunto de datos permitirá explorar y modelar las relaciones entre las variables predictoras y la variable objetivo, contribuyendo así a un mejor entendimiento del impacto de diversos factores en la salud mental.
 
 Los objetivos específicos de este proyecto son:
@@ -39,6 +61,7 @@ Los objetivos específicos de este proyecto son:
 4. Evaluar el desempeño del modelo y analizar la importancia de las características en la predicción.
 
 ### 1.4. Métricas de Evaluación
+
 Para evaluar el desempeño del modelo, utilizaremos la métrica de precisión (accuracy).
 
 Con ella se medirá la proporción de predicciones correctas en relación con el total de predicciones realizadas.
@@ -522,3 +545,8 @@ Fold 10 Accuracy Score: 0.9395
 from sklearn.metrics import classification_report
 print(classification_report(y_valid_fold, valid_pred))
 ```
+
+
+## 8. Referencias
+
+- Organización Mundial de la Salud (OMS). (2023). Depression. Recuperado de https://www.who.int/es/news-room/fact-sheets/detail/depression
