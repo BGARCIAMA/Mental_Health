@@ -14,7 +14,7 @@ professor: "Felipe González"
 cache: true
 ---
 
-En este proyecto, abordaremos la tarea de predecir la variable objetivo **Depresión** utilizando un conjunto de datos titulado **Salud Mental**[link][https://www.kaggle.com/competitions/playground-series-s4e11/data]. Este dataset es el resultado de una encuesta integral cuyo propósito fue analizar los factores asociados al riesgo de depresión en adultos. La comprensión de estos factores puede contribuir al desarrollo de intervenciones más efectivas en el ámbito de la salud mental.
+En este proyecto, abordaremos la tarea de predecir la variable objetivo **Depresión** utilizando un conjunto de datos titulado **Salud Mental** [link](https://www.kaggle.com/competitions/playground-series-s4e11/data). Este dataset es el resultado de una encuesta integral cuyo propósito fue analizar los factores asociados al riesgo de depresión en adultos. La comprensión de estos factores puede contribuir al desarrollo de intervenciones más efectivas en el ámbito de la salud mental.
 
 La encuesta fue llevada a cabo de manera anónima entre enero y junio de 2023 en diversas ciudades, involucrando a personas de diferentes orígenes y profesiones. Los participantes, con edades entre 18 y 60 años, compartieron voluntariamente información sobre una amplia variedad de aspectos, tales como edad, género, ciudad de residencia, entre otros.
 
@@ -239,6 +239,8 @@ Tras la agrupación, las variables categóricas principales quedan resumidas con
 train[["city","profession","sleep_duration","dietary_habits","degree"]].describe(include="object")
 ```
 
+
+
 ##### Relación variables categóricas y Depresión
 
 ```{python}
@@ -404,7 +406,7 @@ La función objetivo se define como el promedio de la precisión obtenida median
 $$\text{Score} = \frac{1}{k} \sum_{i=1}^{k} \text{Accuracy}(i)$$
 
 Donde $\text{Accuracy}(i)$ es la precisión en el $i$-ésimo fold de la validación cruzada. El modelo de CatBoost se entrena y evalúa en cada iteración con una combinación específica de hiperparámetros sugerida por Optuna.
-
+Lo cual regreso los siguientes hiper parámetros:
 ```{python}
 best_params = {'iterations': 633,
  'learning_rate': 0.18918646362839026,

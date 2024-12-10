@@ -147,7 +147,7 @@ window.Quarto = {
 </header>
 
 
-<p>En este proyecto, abordaremos la tarea de predecir la variable objetivo <strong>Depresión</strong> utilizando un conjunto de datos titulado <strong>Salud Mental</strong>[link][https://www.kaggle.com/competitions/playground-series-s4e11/data]. Este dataset es el resultado de una encuesta integral cuyo propósito fue analizar los factores asociados al riesgo de depresión en adultos. La comprensión de estos factores puede contribuir al desarrollo de intervenciones más efectivas en el ámbito de la salud mental.</p>
+<p>En este proyecto, abordaremos la tarea de predecir la variable objetivo <strong>Depresión</strong> utilizando un conjunto de datos titulado <strong>Salud Mental</strong> <a href="https://www.kaggle.com/competitions/playground-series-s4e11/data">link</a>. Este dataset es el resultado de una encuesta integral cuyo propósito fue analizar los factores asociados al riesgo de depresión en adultos. La comprensión de estos factores puede contribuir al desarrollo de intervenciones más efectivas en el ámbito de la salud mental.</p>
 <p>La encuesta fue llevada a cabo de manera anónima entre enero y junio de 2023 en diversas ciudades, involucrando a personas de diferentes orígenes y profesiones. Los participantes, con edades entre 18 y 60 años, compartieron voluntariamente información sobre una amplia variedad de aspectos, tales como edad, género, ciudad de residencia, entre otros.</p>
 <p>El conjunto de datos contiene 140,700 registros en el conjunto de entrenamiento y está compuesto por 20 variables, descritas a continuación:</p>
 <table class="caption-top table">
@@ -719,7 +719,7 @@ memory usage: 21.5+ MB</code></pre>
 <p>Función Objetivo</p>
 <p>La función objetivo se define como el promedio de la precisión obtenida mediante validación cruzada con 3 particiones (<span class="math inline">\(k=3\)</span>):</p>
 <p><span class="math display">\[\text{Score} = \frac{1}{k} \sum_{i=1}^{k} \text{Accuracy}(i)\]</span></p>
-<p>Donde <span class="math inline">\(\text{Accuracy}(i)\)</span> es la precisión en el <span class="math inline">\(i\)</span>-ésimo fold de la validación cruzada. El modelo de CatBoost se entrena y evalúa en cada iteración con una combinación específica de hiperparámetros sugerida por Optuna.</p>
+<p>Donde <span class="math inline">\(\text{Accuracy}(i)\)</span> es la precisión en el <span class="math inline">\(i\)</span>-ésimo fold de la validación cruzada. El modelo de CatBoost se entrena y evalúa en cada iteración con una combinación específica de hiperparámetros sugerida por Optuna. Lo cual regreso los siguientes hiper parámetros:</p>
 <div id="fd0d80cf" class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>best_params <span class="op">=</span> {<span class="st">'iterations'</span>: <span class="dv">633</span>,</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a> <span class="st">'learning_rate'</span>: <span class="fl">0.18918646362839026</span>,</span>
