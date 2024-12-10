@@ -1,0 +1,28 @@
+name: MachineLearning
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - scikit-learn
+  - scikit-optimize
+  - GPy
+  - GPyOpt
+  - xgboost
+  - catboost
+  - pandas
+  - numpy
+  - pytest
+  - ipython
+  - jupyterlab
+  - jupe¿yter-cache
+  - matplotlib
+  - seaborn
+  - plotly
+  - ipyleaflet
+  - pylint
+  - autopep8
+  - joblib
+  - lxml
+  - boto3
+  - awswrangler
