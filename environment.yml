@@ -15,7 +15,7 @@ dependencies:
   - pytest
   - ipython
   - jupyterlab
-  - jupe¿yter-cache
+  - jupyter-cache
   - matplotlib
   - seaborn
   - plotly
