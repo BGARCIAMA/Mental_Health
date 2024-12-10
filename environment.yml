@@ -1,15 +1,17 @@
-name: MachineLearning
+name: AprendizajeMaq
 channels:
   - conda-forge
   - defaults
 dependencies:
   - python
-  - scikit-learn
+  - scikit-learn==1.2.2
   - scikit-optimize
   - GPy
   - GPyOpt
   - xgboost
   - catboost
+  - optuna
+  - category_encoders
   - pandas
   - numpy
   - pytest
