@@ -163,6 +163,7 @@ window.Quarto = {
 </header>
 
 
+
 <section id="mental-health" class="level1">
 <h1>Mental Health</h1>
 <section id="introducción" class="level2">
@@ -803,8 +804,10 @@ if (outputEl) {{
 <p>Función Objetivo</p>
 <p>La función objetivo se define como el promedio de la precisión obtenida mediante validación cruzada con 3 particiones (<span class="math inline">\(k=3\)</span>):</p>
 <p><span class="math display">\[\text{Score} = \frac{1}{k} \sum_{i=1}^{k} \text{Accuracy}(i)\]</span></p>
+
 <p>Donde <span class="math inline">\(\text{Accuracy}(i)\)</span> es la precisión en el <span class="math inline">\(i\)</span>-ésimo fold de la validación cruzada. El modelo de CatBoost se entrena y evalúa en cada iteración con una combinación específica de hiperparámetros sugerida por Optuna.</p>
 <div id="9d20c062" class="cell" data-execution_count="23">
+ 
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>best_params <span class="op">=</span> {<span class="st">'iterations'</span>: <span class="dv">633</span>,</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a> <span class="st">'learning_rate'</span>: <span class="fl">0.18918646362839026</span>,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a> <span class="st">'depth'</span>: <span class="dv">4</span>,</span>
