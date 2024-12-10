@@ -14,8 +14,9 @@ professor: "Felipe González"
 cache: true
 ---
 
-### Prediciendo Depresión en Adultos
-## Un Enfoque de Aprendizaje de Máquina
+# Predicción de Depresión en Adultos
+
+### Un enfoque con machine learning
 
 ## 1. Definición del proyecto
 
@@ -25,17 +26,17 @@ La depresión es un trastorno del estado de ánimo que afecta cómo una persona 
 
 Algunos síntomas comunes de la depresión van desde los emocionales hasta los físicos y cognitivos, y pueden variar en intensidad de una persona a otra. Algunos de los síntomas más comunes incluyen:
 
-- Emocionales:
-  - Tristeza profunda o sensación de vacío.
-  - Pérdida de interés o placer en actividades que solían disfrutarse.
-  - Sentimientos de culpa, inutilidad o desesperanza.
-- Físicos:
-  - Cambios en el apetito o el peso.
-  - Problemas de sueño (insomnio o dormir en exceso).
-  - Fatiga constante o falta de energía.
-- Cognitivos:
-  - Dificultad para concentrarse, pensar o tomar decisiones.
-  - Pensamientos recurrentes de muerte o suicidio.
+-   **Emocionales:**
+    -   Tristeza profunda o sensación de vacío.
+    -   Pérdida de interés o placer en actividades que solían disfrutarse.
+    -   Sentimientos de culpa, inutilidad o desesperanza.
+-   **Físicos**:
+    -   Cambios en el apetito o el peso.
+    -   Problemas de sueño (insomnio o dormir en exceso).
+    -   Fatiga constante o falta de energía.
+-   **Cognitivos**:
+    -   Dificultad para concentrarse, pensar o tomar decisiones.
+    -   Pensamientos recurrentes de muerte o suicidio.
 
 Según la OMS (Organización Mundial de la Salud), la depresión es una de las principales causas de discapacidad en todo el mundo y afecta a personas de todas las edades. Aproximadamente el 5% de los adultos en todo el mundo padecen depresión, lo que equivale a cerca de 280 millones de personas. La depresión es más frecuente en mujeres (6%) que en hombres (4%). En 2020, se estimó que más de 264 millones de personas en todo el mundo padecían depresión, lo que representa un aumento del 18% en la última década. La depresión puede tener un impacto significativo en la calidad de vida de las personas, afectando su bienestar emocional, social y físico.
 
@@ -43,26 +44,26 @@ Es esencial promover la detección temprana y el acceso a tratamientos efectivos
 
 ### 1.2. Descripción general del proyecto
 
-En este proyecto, abordaremos la tarea de predecir la variable objetivo **Depresión** utilizando un conjunto de datos titulado **Salud Mental**[link][https://www.kaggle.com/competitions/playground-series-s4e11/data]. Este dataset es el resultado de una encuesta integral cuyo propósito fue analizar los factores asociados al riesgo de depresión en adultos. La encuesta incluyó preguntas sobre diversos aspectos de la vida de los participantes, como presión académica, satisfacción laboral, hábitos de sueño y alimentación, entre otros.
+En este proyecto, abordaremos la tarea de predecir la variable objetivo **Depresión** utilizando un conjunto de datos titulado [**Salud Mental**](https://www.kaggle.com/competitions/playground-series-s4e11/data). Este dataset fue extraído de Kaggle, mismo que fue el resultado de una encuesta integral cuyo propósito fue analizar los factores asociados al riesgo de depresión en adultos. La encuesta incluyó preguntas sobre diversos aspectos de la vida de los participantes, como presión académica, satisfacción laboral, hábitos de sueño y alimentación, entre otros.
 
-La encuesta fue llevada a cabo de manera anónima entre enero y junio de 2023 en diversas ciudades, involucrando a personas de diferentes orígenes y profesiones. 
+La encuesta fue llevada a cabo de manera anónima entre enero y junio de 2023 en diversas ciudades, involucrando a personas de diferentes orígenes y profesiones.
 
 Los participantes, con edades entre 18 y 60 años, compartieron voluntariamente información sobre una amplia variedad de aspectos, tales como edad, género, ciudad de residencia, entre otros.
 
 ### 1.3. Objetivos
 
-El análisis de este conjunto de datos permitirá explorar y modelar las relaciones entre las variables predictoras y la variable objetivo, contribuyendo así a un mejor entendimiento del impacto de diversos factores en la salud mental.
+El análisis de este conjunto de datos, permitirá explorar y modelar las relaciones entre las variables predictoras y la variable objetivo, contribuyendo así a un mejor entendimiento del impacto de diversos factores en la salud mental.
 
 Los objetivos específicos de este proyecto son:
 
-1. Realizar un análisis exploratorio de los datos para comprender la distribución y relaciones entre las variables.
-2. Realizar ingeniería de características para mejorar la representación de los datos y el desempeño del modelo.
-3. Entrenar un modelo de aprendizaje de máquina para predecir la depresión en adultos.
-4. Evaluar el desempeño del modelo y analizar la importancia de las características en la predicción.
+1.  Realizar un análisis exploratorio de los datos para comprender la distribución y relaciones entre las variables.
+2.  Realizar ingeniería de características para mejorar la representación de los datos y el desempeño del modelo.
+3.  Entrenar un modelo de machine learning para predecir la depresión en adultos.
+4.  Evaluar el desempeño del modelo y analizar la importancia de las características en la predicción.
 
 ### 1.4. Métricas de Evaluación
 
-Para evaluar el desempeño del modelo, utilizaremos la métrica de precisión (accuracy).
+Para evaluar el desempeño del modelo, utilizaremos la métrica de precisión (*accuracy*).
 
 Con ella se medirá la proporción de predicciones correctas en relación con el total de predicciones realizadas.
 
@@ -70,33 +71,34 @@ Dado que la variable objetivo está desbalanceada, la precisión proporcionará 
 
 ## 2. Exploratory data analysis (EDA)
 
+Es esta sección, se presentará el resultado del análisis exploratorio de los datos.
+
 ### 2.1. Características del dataset
 
-El conjunto de dataset está compuesto por 20 variables, descritas a continuación:
+El dataset está compuesto por 20 variables, descritas a continuación:
 
-| Variable                                  | Descripción                                               |
-| ----------------------------------------- | --------------------------------------------------------- |
-| id                                        | Identificador único del registro                          |
-| Nombre                                    | Nombre del participante                                   |
-| Género                                    | Género del participante                                   |
-| Edad                                      | Edad del participante                                     |
-| Ciudad                                    | Ciudad de residencia                                      |
-| Profesionista/Estudiante                  | Ocupación principal                                       |
-| Profesión                                 | Campo laboral o académico                                 |
-| Presión\_académica                        | Nivel de presión relacionado con los estudios             |
-| Presión\_laboral                          | Nivel de presión relacionado con el trabajo               |
-| CGPA                                      | Promedio general acumulado                                |
-| Satisfacción\_académica                   | Nivel de satisfacción con los estudios                    |
-| Satisfacción\_laboral                     | Nivel de satisfacción con el trabajo                      |
-| Tiempo\_dormir                            | Horas promedio de sueño por día                           |
-| Hábitos\_alimenticios                     | Calidad percibida de los hábitos alimenticios             |
-| Grado\_académico                          | Nivel más alto de educación alcanzado                     |
-| Pensamientos\_suicidas                    | Indicadores de pensamientos suicidas                      |
-| Horas\_estudio/trabajo                    | Promedio de horas dedicadas a estudio o trabajo           |
-| Estrés\_financiero                        | Percepción de presión financiera                          |
-| Antecedente\_familiar\_enfermedad\_mental | Presencia de antecedentes familiares de enfermedad mental |
-| Depresión                                 | Indicador binario de depresión (variable objetivo)        |
-
+| Variable | Descripción |
+|--------------------------------|------------------------------------------|
+| `id` | Identificador único del registro |
+| `Nombre` | Nombre del participante |
+| `Género` | Género del participante |
+| `Edad` | Edad del participante |
+| `Ciudad` | Ciudad de residencia |
+| `Profesionista/Estudiante` | Ocupación principal |
+| `Profesión` | Campo laboral o académico |
+| `Presión_académica` | Nivel de presión relacionado con los estudios |
+| `Presión_laboral` | Nivel de presión relacionado con el trabajo |
+| `CGPA` | Promedio general acumulado |
+| `Satisfacción_académica` | Nivel de satisfacción con los estudios |
+| `Satisfacción_laboral` | Nivel de satisfacción con el trabajo |
+| `Tiempo_dormir` | Horas promedio de sueño por día |
+| `Hábitos_alimenticios` | Calidad percibida de los hábitos alimenticios |
+| `Grado_académico` | Nivel más alto de educación alcanzado |
+| `Pensamientos_suicidas` | Indicadores de pensamientos suicidas |
+| `Horas_estudio/trabajo` | Promedio de horas dedicadas a estudio o trabajo |
+| `Estrés_financiero` | Percepción de presión financiera |
+| `Antecedente_familiar_enfermedad_mental` | Presencia de antecedentes familiares de enfermedad mental |
+| `Depresión` | Indicador binario de depresión (**variable objetivo**) |
 
 ```{python}
 #| echo: false
@@ -120,20 +122,18 @@ warnings.filterwarnings('ignore')
 #| label: info
 train = pd.read_csv('data/train.csv')
 test = pd.read_csv("data/test.csv")
-# rename columns
 train.columns = [col.lower().replace(" ","_") for col in train.columns]
 test.columns = [col.lower().replace(" ","_") for col in test.columns]
-#train.info()
-#test.info()
 ```
-La forma de los datasets de entrenamiento y test tienen la siguiente estructura:
 
-| Dataset             | Rows           | Columns        |
-| ------------------- | -------------- | -------------- |
-| Train               | 140700         | 20             |
-| Test                | 93800          | 19             |
+Los datasets de train y test tienen la siguiente estructura:
 
-El conjunto de test no incluye la variable objetivo para la predicción.
+| Dataset |  Rows   | Columns |
+|:-------:|:-------:|:-------:|
+|  Train  | 14,0700 |   20    |
+|  Test   | 93,800  |   19    |
+
+Cabe destacar que el conjunto de test, no incluye la variable objetivo para la predicción (`Depression`).
 
 ### 2.3. Variables y tipo de datos
 
@@ -144,9 +144,9 @@ El conjunto de test no incluye la variable objetivo para la predicción.
 train.describe().round(2).style.format(precision=2)
 ```
 
-- El análisis exploratorio de las variables numéricas revela que las relacionadas con satisfacción, presión y estrés están en una escala de 1 a 5, con medias cercanas a 3. 
-- La edad de los participantes oscila entre 18 y 60 años, con una media de 40.4, mientras que las horas de trabajo/estudio tienen una media de 6.25 horas diarias. 
-- El rendimiento académico (CGPA) muestra valores altos, con una media de 7.66. La variable objetivo, depression, indica que alrededor del 18% de los participantes presenta riesgo de depresión.
+-   El análisis exploratorio de las variables numéricas revela que las relacionadas con satisfacción, presión y estrés están en una escala de 1 a 5, con medias cercanas a 3.
+-   La edad de los participantes oscila entre 18 y 60 años, con una media de 40.4, mientras que las horas de trabajo/estudio tienen una media de 6.25 horas diarias.
+-   El rendimiento académico (`CGPA`) muestra valores altos, con una media de 7.66. La variable objetivo, `Depression`, indica que alrededor del 18% de los participantes presenta riesgo de depresión.
 
 **Variables categóricas**
 
@@ -155,11 +155,11 @@ train.describe().round(2).style.format(precision=2)
 train.describe(include="object")
 ```
 
-- En cuanto a las variables categóricas, destacan 98 ciudades únicas y 64 profesiones, con "Teacher" como la más común. 
-- Duraciones de sueño como "Less than 5 hours" son las más reportadas, mientras que los antecedentes familiares de enfermedad mental y pensamientos suicidas tienen predominancia de respuestas negativas. 
-- Estos resultados iniciales subrayan la diversidad del dataset y señalan áreas clave para el tratamiento de datos, como los valores nulos y categorías con alta cardinalidad.
+-   En cuanto a las variables categóricas, destacan 98 ciudades únicas y 64 profesiones, con "Teacher" como la más común.
+-   Duraciones de sueño como "Less than 5 hours" son las más reportadas, mientras que los antecedentes familiares de enfermedad mental y pensamientos suicidas tienen predominancia de respuestas negativas.
+-   Estos resultados iniciales subrayan la diversidad del dataset y señalan áreas clave para el tratamiento de datos, como los valores nulos y categorías con alta cardinalidad.
 
-### 2.4. Descripción de Variable objetivo
+### 2.4. Descripción de variable objetivo
 
 ```{python}
 #| echo: false
@@ -181,9 +181,9 @@ plt.title("Distribución de la variable Depresión", fontsize=14)
 plt.show()
 ```
 
-- El análisis de la variable objetivo depression revela un conjunto de datos desbalanceado, donde aproximadamente el 82% de los registros corresponden a individuos sin depresión y solo el 18% a casos positivos. Esta desigualdad es visualmente evidente en la gráfica de distribución.
+-   El análisis de la variable objetivo `depression` revela un conjunto de datos desbalanceado, donde aproximadamente el 82% de los registros corresponden a individuos sin depresión y solo el 18% a casos positivos. Esta desigualdad es visualmente evidente en la gráfica de distribución.
 
-- El desbalance en la variable objetivo establece un desafío en el modelado predictivo, ya que los modelos pueden inclinarse hacia la clase mayoritaria. Sin embargo, también sugiere que un punto de referencia inicial para la métrica de precisión (accuracy) debe superar el 82%, ya que ese sería el desempeño esperado al predecir siempre la clase mayoritaria.
+-   El desbalance en la variable objetivo establece un desafío en el modelado predictivo, ya que los modelos pueden inclinarse hacia la clase mayoritaria. Sin embargo, también sugiere que un punto de referencia inicial para la métrica de precisión (*accuracy*) debe superar el 82%, ya que ese sería el desempeño esperado al predecir siempre la clase mayoritaria.
 
 ### 2.5. Valores Nulos
 
@@ -208,16 +208,173 @@ plt.legend(loc='upper right')
 plt.show()
 ```
 
-- En particular, las variables relacionadas con estudiantes, como academic_pressure, cgpa, y study_satisfaction, presentan hasta un 80% de valores nulos. Este resultado refleja una menor representación de estudiantes en comparación con profesionistas dentro del dataset.
+-   En particular, las variables relacionadas con estudiantes, como `academic_pressure`, `cgpa`, y `study_satisfaction`, presentan hasta un 80% de valores nulos. Este resultado refleja una menor representación de estudiantes en comparación con profesionistas dentro del dataset.
 
-- A pesar del alto porcentaje de valores faltantes en estas variables, no se eliminarán del análisis, ya que contienen información valiosa para los casos específicos de estudiantes. Este enfoque permite preservar datos que pueden ser relevantes en el desarrollo del modelo predictivo, especialmente para evaluar las diferencias entre grupos ocupacionales. 
+-   A pesar del alto porcentaje de valores faltantes en estas variables, no se eliminarán del análisis, ya que contienen información valiosa para los casos específicos de estudiantes. Este enfoque permite preservar datos que pueden ser relevantes en el desarrollo del modelo predictivo, especialmente para evaluar las diferencias entre grupos ocupacionales.
 
-- Las estrategias de imputación y tratamiento de valores nulos serán fundamentales para garantizar la calidad del análisis posterior.
+-   Las estrategias de imputación y tratamiento de valores nulos serán fundamentales para garantizar la calidad del análisis posterior.
 
 ### 2.6. Visualizaciones
 
+En esta sección, se presentará el análisis visual de las variables del dataset con ayuda de gráficos.
 
+```{python}
+#| echo: false
+#| label: librerias_visualizaciones
 
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+import seaborn as sns
+import plotly.graph_objects as go
+import plotly.express as px
+import squarify
+```
+
+```{python}
+#| echo: false
+num_feats = train.select_dtypes(include="float64").columns
+obj_feats = train.select_dtypes(include="object").columns
+
+fig = plt.figure(figsize=(8, 8))
+for i, feature in enumerate(num_feats):
+    ax = fig.add_subplot(7, 2, i + 1)
+    sns.histplot(
+        train[feature],
+        stat="percent",
+        kde=True,
+        bins=20,
+        alpha=0.4,
+        color="#66b7ee",
+        line_kws={"lw": 1, "linestyle": "dashed"},
+    ).lines[0].set_color("darkred")
+    plt.tick_params(axis="both", labelsize=9)
+    plt.ylabel("Porcentaje", fontsize=9)
+    plt.xlabel(feature, fontsize=9)
+fig.tight_layout()
+plt.show()
+```
+
+-   Con estos histogramas podemos analizar las distribuciones de los datos y detectar patrones o anomalías en las características numéricas, e identificar las que en realidad son categóricas.
+
+<!-- -->
+
+-   Para la variable de `age` la distribución es aproximadamente uniforme, aunque hay un ligero aumento en la frecuencia en el rango de los 40 años.
+
+-   Para las variables como `academic_pressure`, `work_pressure`, `study_satisfaction`, `job_satisfaction` y `financial_stress` las distribuciones son multimodales, lo que nos indica que están influenciadas por factores externos que generan diferentes "grupos" y podemos considerarlas como categóricas ya que probablemente en la encuesta manejaron las variables en escala del 1 al 5.
+
+```{python}
+#| echo: false
+cat_colors = ['#1c76b6', '#a7dae9', '#eb6a20', '#f59d3d', '#677fa0', '#d6e4ed', '#f7e9e5']
+
+cat_to_plot = ['gender', 'working_professional_or_student', 'academic_pressure', 
+                       'work_pressure', 'study_satisfaction', 'job_satisfaction',
+                       'have_you_ever_had_suicidal_thoughts_?', 'financial_stress', 
+                       'family_history_of_mental_illness']
+for column in cat_to_plot:
+    plt.figure(figsize=(5, 3))
+    sns.countplot(data=train, x=column, palette=cat_colors)
+    plt.title(f'Diagrama de recuento de {column}')
+    plt.tight_layout()
+    plt.show()
+```
+
+-   El dataset, muestra una mayor representación de hombres en comparación con mujeres, con una significativa mayoría perteneciente a la categoría de profesionales que trabajan.
+
+-   Los hábitos alimenticios de las personas son diversos, distribuidos entre categorías moderadas, saludables y no saludables de manera bastante equilibrada.
+
+-   En cuanto a los patrones de sueño, la mayoría de los individuos reportan dormir entre 5 y 8 horas por noche, lo que se encuentra dentro de un rango considerado saludable. Esto refleja una tendencia general hacia comportamientos de vida relativamente equilibrados.
+
+-   Un análisis sobre los aspectos de salud mental revela cifras preocupantes. Una proporción significativa de la población reporta haber tenido pensamientos suicidas, con una distribución casi equilibrada entre respuestas afirmativas y negativas.
+
+-   Además, aproximadamente la mitad de las personas indican antecedentes familiares de enfermedades mentales. Estas estadísticas resaltan la importancia de investigar más a fondo los factores asociados con la salud mental.
+
+```{python}
+#| echo: false
+bi_palette = ["#5EDB92",
+              "#5A665F"]
+num_to_plot = ["age", "cgpa", "work/study_hours"]
+target = train.select_dtypes(include="int64").columns
+
+for column in num_to_plot:
+    plt.figure(figsize=(5, 3))
+    sns.violinplot(data = train, x = target[1], y = column, palette = bi_palette) 
+    plt.title(f'Distribución de {column} por Depresión')
+    plt.tight_layout()
+    plt.show()
+```
+
+```{python}
+#| echo: false
+value_counts = train['profession'].value_counts()
+sizes = value_counts.values[:20]  # Mostramos el top 20
+colors = sns.color_palette("pastel", len(sizes))
+
+labels = [
+    "Customer\nSupport" if label == "Customer Support" else
+    "Educational\nConsultant" if label == "Educational Consultant" else
+    "Travel\nConsultant" if label == "Travel Consultant" else
+    "Data\nScientist" if label == "Data Scientist" else
+    "Business\nAnalyst" if label == "Business Analyst" else
+    "Marketing\nManager" if label == "Marketing Manager" else
+    label
+    for label in value_counts.index[:20]
+]
+
+plt.figure(figsize=(8, 6))
+squarify.plot(sizes=sizes, 
+              label=labels, 
+              color=colors, 
+              text_kwargs = {'fontsize': 8, 'color': 'black'},
+              pad=True)
+plt.title(f"Mapa de profesiones (Top 20)")
+plt.axis("off")
+plt.show()
+```
+
+-   En cuanto a ocupaciones, destaca una alta proporción de personas en el sector educativo, específicamente profesores, que constituyen la profesión predominante.
+
+```{python}
+#| echo: false
+top_n_professions = 20
+profession_counts = train['profession'].value_counts().nlargest(top_n_professions)
+filtered_data = train[train['profession'].isin(profession_counts.index)]
+
+sankey_data = filtered_data.groupby(['profession', 'depression']).size().reset_index(name='Count')
+
+labels = list(sankey_data['profession'].unique()) + ['No Depression', 'Depression']
+source_indices = []
+target_indices = []
+
+for _, row in sankey_data.iterrows():
+    profession_index = labels.index(row['profession'])
+    depression_index = labels.index('Depression' if row['depression'] == 1 else 'No Depression')
+    source_indices.append(profession_index)
+    target_indices.append(depression_index)
+
+palette = sns.color_palette("pastel", len(labels))
+colors = [f'rgba({int(r*255)}, {int(g*255)}, {int(b*255)}, 0.8)' for r, g, b in palette]
+
+fig = go.Figure(data=[go.Sankey(
+    node=dict(
+        pad=15,
+        thickness=20,
+        line=dict(color="black", width=0.5),
+        label=labels,
+        color=colors),
+    link=dict(
+        source=source_indices,
+        target=target_indices,
+        value=sankey_data['Count']
+    ))])
+
+fig.update_layout(
+    title_text="Diagrama de Sankey de profesión y depresión", 
+    font_size=10,
+    width=700, 
+    height=600)
+
+fig.show()
+```
 
 ## 3. Preprocesamiento de datos
 
@@ -225,10 +382,10 @@ plt.show()
 
 Se añadieron características derivadas para enriquecer el dataset y mejorar el análisis. Estas incluyen:
 
-* satisfaction_by_work: Relación entre presión laboral y satisfacción en el trabajo.
-* satisfaction_by_study: Relación entre presión y satisfacción académica.
-* age_work_satisfaction: Razón entre edad y satisfacción laboral.
-* cgpa_study: Relación entre promedio académico y presión académica.
+-   `satisfaction_by_work`: Relación entre presión laboral y satisfacción en el trabajo.
+-   `satisfaction_by_study`: Relación entre presión y satisfacción académica.
+-   `age_work_satisfaction`: Razón entre edad y satisfacción laboral.
+-   `cgpa_study`: Relación entre promedio académico y presión académica.
 
 Estas nuevas variables buscan capturar interacciones clave, como el impacto de la presión en la satisfacción o el desempeño bajo diferentes condiciones, y tienen el potencial de mejorar el modelo predictivo. Las varibales se crean con la siguiente función:
 
@@ -249,25 +406,71 @@ train = new_feats(train).copy()
 test = new_feats(test).copy()
 ```
 
+Se realizó un proceso de limpieza de datos enfocado en la estandarización de los valores de la columna `degree` en la base de datos. Para ello, estoy utilizando un diccionario de mapeo que normaliza y unifica las diferentes representaciones de títulos académicos. Este mapeo incluye equivalencias entre términos que, aunque diferentes en la base de datos, representan el mismo grado académico.
+
+Por ejemplo:
+
+-   Variaciones como `"BCom"`, `"B.Com"`, y `"B.Comm"` se unifican bajo el valor estándar `"B.Com"`.
+
+-   Representaciones como `"MSc"`, `"M.Sc"`, y `"Master of Science"` se convierten en `"M.Sc"`.
+
+-   Títulos escolares como `"Class 12"` y `"12th"` se consolidan en `"Class 12"`.
+
+El propósito de este procedimiento es garantizar la consistencia en los valores de la columna, facilitando análisis posteriores y mejorando la calidad del modelo al trabajar con datos limpios y estandarizados. La misma transformación se aplica tanto al conjunto de entrenamiento como al de prueba para mantener la uniformidad entre ambos datasets.
+
+```{python}
+#| echo: false
+degree = {
+    "BCom": "B.Com", "B.Com": "B.Com", "B.Comm": "B.Com",
+    "B.Tech": "B.Tech", "BTech": "B.Tech", "B.T": "B.Tech",
+    "BSc": "B.Sc", "B.Sc": "B.Sc", "Bachelor of Science": "B.Sc",
+    "BArch": "B.Arch", "B.Arch": "B.Arch",
+    "BA": "B.A", "B.A": "B.A",
+    "BBA": "BBA", "BB": "BBA",
+    "BCA": "BCA",
+    "BE": "BE",
+    "BEd": "B.Ed", "B.Ed": "B.Ed",
+    "BPharm": "B.Pharm", "B.Pharm": "B.Pharm",
+    "BHM": "BHM",
+    "LLB": "LLB", "LL B": "LLB", "LL BA": "LLB", "LL.Com": "LLB", "LLCom": "LLB",
+    "MCom": "M.Com", "M.Com": "M.Com",
+    "M.Tech": "M.Tech", "MTech": "M.Tech", "M.T": "M.Tech",
+    "MSc": "M.Sc", "M.Sc": "M.Sc", "Master of Science": "M.Sc",
+    "MBA": "MBA",
+    "MCA": "MCA",
+    "MD": "MD",
+    "ME": "ME",
+    "MEd": "M.Ed", "M.Ed": "M.Ed",
+    "MArch": "M.Arch", "M.Arch": "M.Arch",
+    "MPharm": "M.Pharm", "M.Pharm": "M.Pharm",
+    "MA": "MA", "M.A": "MA",
+    "MPA": "MPA",
+    "LLM": "LLM",
+    "PhD": "PhD",
+    "MBBS": "MBBS",
+    "CA": "CA",
+    "Class 12": "Class 12", "12th": "Class 12",
+    "Class 11": "Class 11", "11th": "Class 11"
+}
+
+train['degree'] = train['degree'].map(degree)
+test['degree'] = test['degree'].map(degree)
+```
+
 Dado que algunas variables categóricas presentan un gran número de categorías únicas, se implementó una estrategia para agrupar las categorías menos representativas en una etiqueta denominada "Other". Esto asegura que las categorías seleccionadas representen al menos el 90% de los datos, reduciendo la dimensionalidad y facilitando el análisis.
 
 Las columnas ajustadas incluyen:
 
-* city
-* profession
-* sleep_duration
-* dietary_habits
-* degree
+-   `city`
+-   `profession`
+-   `sleep_duration`
+-   `dietary_habits`
+-   `degree`
 
 Esta transformación permite simplificar la estructura del dataset sin perder información relevante, mejorando la manejabilidad del modelo y reduciendo el riesgo de sobreajuste debido a categorías con baja frecuencia.
 
 ```{python}
 #| echo: false
-
-num_feats = train.select_dtypes(include="float64").columns
-obj_feats = train.select_dtypes(include="object").columns
-target = train.select_dtypes(include="int64").columns
-
 def group_low_frequency(train, test, column, threshold_percentage):
     """
     Agrupa las categorías con representación acumulativa menor al umbral definido en "Other".
@@ -281,21 +484,11 @@ def group_low_frequency(train, test, column, threshold_percentage):
     Returns:
         pd.Series, pd.Series: Columnas transformadas para `train` y `test`.
     """
-    # Calcular la frecuencia normalizada y ordenarla
     value_counts = train[column].value_counts(normalize=True).sort_values(ascending=False)
-
-    # Calcular el porcentaje acumulativo
     cumsum = value_counts.cumsum()
-
-    # Identificar categorías que generan el porcentaje acumulativo dentro del umbral
     valid_categories = cumsum[cumsum <= threshold_percentage].index
-
-    # Transformar la columna en train
     train_transformed = train[column].apply(lambda x: x if x in valid_categories else "Other")
-
-    # Transformar la columna en test (usar categorías válidas de train)
     test_transformed = test[column].apply(lambda x: x if x in valid_categories else "Other")
-
     return train_transformed, test_transformed
 
 ```
@@ -310,6 +503,7 @@ train["degree"], test["degree"] = group_low_frequency(train, test, 'degree', 0.9
 ```
 
 Tras la agrupación, las variables categóricas principales quedan resumidas con las categorías más representativas
+
 ```{python}
 #| echo: false
 train[["city","profession","sleep_duration","dietary_habits","degree"]].describe(include="object")
@@ -351,26 +545,29 @@ def catplt(x_var, aspect = 4):
 #| echo: false
 catplt(x_var="work/study_hours", aspect= 8)
 ```
-El análisis gráfico de la variable work/study_hours muestra un patrón interesante: a medida que aumentan las horas dedicadas al trabajo o estudio, también aumenta la proporción de casos con indicadores de depresión.
 
+-   El análisis gráfico de la variable `work/study_hours` muestra un patrón interesante, ya que a medida que aumentan las horas dedicadas al trabajo o estudio, también aumenta la proporción de casos con indicadores de depresión.
 
 ```{python}
 #| echo: false
 catplt(x_var="working_professional_or_student")
 ```
-Los resultados muestran que más de la mitad de los estudiantes en el dataset tienen indicadores de depresión. Esto resalta una diferencia notable en comparación con los profesionales, sugiriendo que el entorno académico puede ser un factor de estrés significativo.
+
+-   Los resultados muestran que más de la mitad de los estudiantes en el dataset tienen indicadores de depresión. Esto resalta una diferencia notable en comparación con los profesionales, sugiriendo que el entorno académico puede ser un factor de estrés significativo.
 
 ```{python}
 #| echo: false
 catplt(x_var="gender")
 ```
-Aunque hay más hombres con depresión en términos absolutos, los porcentajes de depresión entre hombres y mujeres son similares, alrededor del 18%. Esto indica que la distribución de la variable objetivo no presenta un sesgo significativo entre géneros.
+
+-   Aunque hay más hombres con depresión en términos absolutos, los porcentajes de depresión entre hombres y mujeres son similares, alrededor del 18%. Esto indica que la distribución de la variable objetivo no presenta un sesgo significativo entre géneros.
+
 ```{python}
 #| echo: false
 catplt(x_var="study_satisfaction")
 ```
-Se observa una clara relación inversa entre la satisfacción en los estudios y la propensión a la depresión. A menor satisfacción académica, mayor es la proporción de casos positivos de depresión, lo que refuerza la importancia del bienestar en el ámbito educativo.
 
+-   Se observa una clara relación inversa entre la satisfacción en los estudios y la propensión a la depresión. A menor satisfacción académica, mayor es la proporción de casos positivos de depresión, lo que refuerza la importancia del bienestar en el ámbito educativo.
 
 ### 3.3 Mapa de correlación entre variable numéricas
 
@@ -392,36 +589,34 @@ sns.heatmap(
     linewidths=0.5,
     cbar_kws={"shrink": 0.8},
 )
-plt.title("Correlation Matrix\n")
+plt.title("Matriz de correlaciones\n")
 plt.xticks(fontsize=9)
 plt.yticks(fontsize=9)
 plt.show()
 ```
-
 
 ## 4. Algoritmos y Modelado
 
 ```{python}
 #| echo: false
 #| label: Sklearn libraries
-
 from sklearn.model_selection import (
     train_test_split,
-    StratifiedKFold,
-)
+    StratifiedKFold)
 
 from catboost import CatBoostClassifier, Pool
 from sklearn.linear_model import LogisticRegression
 ```
 
-### 4.1 CatBoost
+### 4.1 Regresión Logística
+
+### 4.2 CatBoost
 
 CatBoost es un algoritmo de aprendizaje automático basado en árboles de decisión que utiliza técnicas avanzadas de boosting. Es especialmente útil para trabajar con datos categóricos, ya que implementa un manejo eficiente de estas variables mediante codificación automática, lo que reduce la necesidad de preprocesamiento adicional. Además, CatBoost es conocido por su capacidad de minimizar el riesgo de sobreajuste y su alto desempeño en tareas de clasificación y regresión.
 
 Elegimos CatBoost para este ejercicio debido a la naturaleza del dataset, que contiene una combinación de variables numéricas y categóricas. Su capacidad para procesar variables categóricas de forma nativa, junto con su robustez frente al desbalance de datos, lo hace ideal para predecir nuestra variable objetivo, **depression**, en un conjunto de datos con estructuras y distribuciones complejas. Además, el rendimiento competitivo de CatBoost en comparación con otros algoritmos de boosting lo convierte en una opción sólida para este tipo de problema.
 
 Para entrenar el modelo, el dataset se preprocesó llenando valores faltantes con "0" y ajustando los tipos de datos según la naturaleza de las variables (numéricas, categóricas y objetivo). Posteriormente, se dividieron los datos en conjuntos de entrenamiento y prueba, utilizando el 70% de los datos para entrenamiento y el 30% para prueba. Este procedimiento garantiza una evaluación justa del modelo, preservando datos no vistos para validar su desempeño y evitar el sobreajuste.
-
 
 ```{python}
 #| echo: false
@@ -447,11 +642,10 @@ print(y.shape)
 
 ```
 
-
-En este paso, utilizamos Optuna, una biblioteca eficiente para la optimización de hiperparámetros, con el objetivo de encontrar la mejor configuración para el modelo de CatBoostClassifier. La función de optimización busca maximizar el desempeño del modelo en términos de precisión (accuracy) utilizando un enfoque basado en validación cruzada.
-Espacio de Búsqueda
+En este paso, utilizamos Optuna, una biblioteca eficiente para la optimización de hiperparámetros, con el objetivo de encontrar la mejor configuración para el modelo de CatBoostClassifier. La función de optimización busca maximizar el desempeño del modelo en términos de precisión (accuracy) utilizando un enfoque basado en validación cruzada. Espacio de Búsqueda
 
 El espacio de búsqueda incluye los siguientes hiperparámetros:
+
 ```{python}
 def objective(trial):
     # Espacio de búsqueda para los hiperparámetros
@@ -475,7 +669,6 @@ def objective(trial):
     return score
 ```
 
-
 Función Objetivo
 
 La función objetivo se define como el promedio de la precisión obtenida mediante validación cruzada con 3 particiones ($k=3$):
@@ -494,7 +687,6 @@ best_params = {'iterations': 633,
  'l2_leaf_reg': 10.504885456201343,
  'random_strength': 0.664861942866057}
 ```
-
 
 ```{python}
 #| eval: false
@@ -521,6 +713,7 @@ for i, (full_train_idx, valid_idx) in enumerate(cat_cv_splits):
     last_test_df_preds.append(test_df_pred)
     print(f'Fold {i + 1} Accuracy Score: {score}')
 ```
+
 Fold 1 Accuracy Score: 0.9383
 
 Fold 2 Accuracy Score: 0.9420
@@ -540,13 +733,13 @@ Fold 8 Accuracy Score: 0.9429
 Fold 9 Accuracy Score: 0.9403
 
 Fold 10 Accuracy Score: 0.9395
+
 ```{python}
 #| eval: false
 from sklearn.metrics import classification_report
 print(classification_report(y_valid_fold, valid_pred))
 ```
 
-
 ## 8. Referencias
 
-- Organización Mundial de la Salud (OMS). (2023). Depression. Recuperado de https://www.who.int/es/news-room/fact-sheets/detail/depression
+-   Organización Mundial de la Salud (OMS). (2023). Depression. Recuperado de https://www.who.int/es/news-room/fact-sheets/detail/depression
