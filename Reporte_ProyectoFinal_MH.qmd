@@ -78,7 +78,7 @@ Es esta sección, se presentará el resultado del análisis exploratorio de los 
 El dataset está compuesto por 20 variables, descritas a continuación:
 
 | Variable | Descripción |
-|--------------------------------|------------------------------------------|
+|------------------------------|------------------------------------------|
 | `id` | Identificador único del registro |
 | `Nombre` | Nombre del participante |
 | `Género` | Género del participante |
@@ -867,16 +867,126 @@ metrica
 
 ## 5. Selección de modelo
 
-De acuerdo a la métrica que se seleccionó, el mejor modelo es un CatBoost
+De acuerdo a la métrica que se seleccionó, el mejor modelo es un **CatBoost** el cual presentó una precisión media de 0.9402 en la validación cruzada. Este modelo supera a la **regresión logística** (modelo baseline) y al **XGBClassifier**, que obtuvieron una precisión de 0.9185 y 0.9398, respectivamente. A continuación se presentan los resultados obtenidos, así como la comparación entre modelos.
 
 ### 5.1 Optimización de hiperparámetros
 
+La optimización de los hiperparámetros del modelo se llevó a cabo utilizando la biblioteca **Optuna**, una herramienta de optimización automática de hiperparámetros basada en técnicas de búsqueda bayesiana.
+
+Por defecto, Optuna implementa un algoritmo de optimización bayesiano (TPE), pero se puede cambiar fácilmente a otros algoritmos existentes en el paquete.Optuna denomina sus algoritmos de optimización en dos categorías diferentes:
+
+**Sampling strategy**: algoritmos que seleccionan la mejor combinación de parámetros, concentrándose en las zonas, en las que los hiperparámetros, dan mejores resultados.
+
+**Pruning strategy**: Métodos de optimización basados en la parada temprana.
+
+**TPESampler** (Tree-Structured Parzen Estimator), es un algoritmo de optimización bayesiano que:
+
+-   En primer lugar, selecciona aleatoriamente un subconjunto de hiperparámetros y los ordena en función de sus puntuaciones.
+
+-   Los hiperparámetros ,se dividen a su vez en dos grupos, en función de algún cuantil predefinido.
+
+-   A continuación, los dos grupos se modelan en densidades estimadas $l(x_1)$ y $g(x_2)$ utilizando estimadores *Parzen* (estimadores de densidad kernel).
+
+-   Localiza los hiperparámetros con mayor mejora esperada \[menor $l(x_1)$/ $g(x_2)$ \]. Los hiperparámetros con mayor mejora esperada (*expected improvement*) se evalúan, ordenan y dividen de nuevo.
+
+-   Este proceso se repite hasta que finaliza el presupuesto y se devuelven los mejores hiperparámetros.
+
+**SuccessiveHalvingPruner** (Asynchronous Successive Halving)
+
+Selecciona aleatoriamente un conjunto inicial de valores de hiperparámetros. Entrena los ensayos durante 1 época, hasta alcanzar el número máximo de ensayos definido.
+
+Al mismo tiempo, una prueba es promovida simultáneamente a otro escalón (similar al rango) para entrenar más épocas, siempre que la puntuación de la prueba esté entre el $d$ por ciento superior dentro del escalón donde $d$ es un divisor predefinido.
+
+Tenga en cuenta que esto es diferente de la división a la mitad sucesiva síncrona, en la que el algoritmo espera a que todas las pruebas definidas en un escalón terminen sus épocas y sólo entonces decide qué pruebas tienen las mejores puntuaciones para ser promovidas a entrenar más épocas en otro escalón.
+
+el enfoque descrito anteriormente, permite identificar de manera eficiente la combinación óptima de parámetros que maximicen el rendimiento del modelo, en este caso, el *accuracy*.
+
+### Proceso de Optimización:
+
+1.  **Definición de la Función Objetivo**: La función objetivo fue diseñada para entrenar el modelo **XGBoost** con un conjunto de hiperparámetros sugeridos en cada iteración y calcular el rendimiento del modelo en términos de la métrica (*accuracy*).
+
+2.  **Espacio de Búsqueda**: Se definió un rango para cada hiperparámetro clave:
+
+    -   `colsample_bytree`: Proporción de columnas utilizadas por árbol.
+
+    -   `n_estimators`: Número de árboles.
+
+    -   `learning_rate`: Tasa de aprendizaje.
+
+    -   `reg_lambda`: Regularización L2.
+
+    -   `reg_alpha`: Regularización L1.
+
+    -   `max_depth`: Profundidad máxima del árbol.
+
+    -   `gamma`: Reducción mínima de la pérdida necesaria para realizar una partición.
+
+3.  **Optimización**: Se utilizó el método de búsqueda aleatoria dentro de **Optuna** para explorar el espacio de hiperparámetros. El proceso incluyó:
+
+    -   **300 iteraciones** para evaluar diferentes combinaciones de parámetros.
+
+    -   **Evaluación cruzada** mediante el conjunto de datos de entrenamiento y prueba.
+
+    -   Uso de un **callback** para registrar los mejores resultados en tiempo real.
+
+4.  **Resultados**:
+
+    | **Hyperparameter** | **Value** | **Description** |
+    |-----------------|-----------------|---------------------------------------|
+    | **iterations** | 633 | Número total de iteraciones del modelo. |
+    | **learning_rate** | 0.18918646362839026 | Tasa de aprendizaje para ajustar la contribución de cada iteración. |
+    | **depth** | 4 | Profundidad máxima de los árboles de decisión. |
+    | **colsample_bylevel** | 0.9909843814690833 | Proporción de columnas seleccionadas para cada nivel del árbol. |
+    | **subsample** | 0.9778634549619083 | Proporción de muestras seleccionadas para entrenar cada iteración. |
+    | **min_data_in_leaf** | 1 | Número mínimo de observaciones necesarias en una hoja. |
+    | **l2_leaf_reg** | 10.504885456201343 | Regularización L2 aplicada a las hojas para prevenir sobreajuste. |
+    | **random_strength** | 0.664861942866057 | Amplitud de la distribución aleatoria utilizada para las divisiones del árbol. |
+
+Estos hiperparámetros optimizados permiten al modelo de CatBoost alcanzar un desempeño óptimo en la predicción de la variable objetivo, **depression**, en el dataset analizado. La optimización de hiperparámetros es un paso crítico en el desarrollo de modelos de aprendizaje automático, ya que permite ajustar la configuración del modelo para maximizar su capacidad predictiva y generalización.
+
 ### 5.2 Validación cruzada
+
+El modelo de CatBoost se evaluó mediante validación cruzada con 20 particiones estratificadas, lo que garantiza una distribución equitativa de las clases en cada fold. Los resultados de la validación cruzada muestran una precisión promedio de 0.9402 en los 10 folds, lo que indica un desempeño consistente y robusto del modelo en la predicción de la variable objetivo, **depression**. La precisión obtenida en cada fold es la siguiente:
+
+| **Fold**    | **Accuracy Score**    |
+|-------------|-----------------------|
+| Fold 1      | 0.9383084577114428    |
+| Fold 2      | 0.9420753375977257    |
+| Fold 3      | 0.9375977256574272    |
+| Fold 4      | 0.9389481165600568    |
+| Fold 5      | 0.9419331911869225    |
+| Fold 6      | 0.940724946695096     |
+| Fold 7      | 0.9396588486140725    |
+| Fold 8      | 0.9429282160625444    |
+| Fold 9      | 0.9403695806680882    |
+| Fold 10     | 0.9395167022032693    |
+| **Average** | **0.940606312395064** |
 
 ### 5.3 Comparación de modelos
 
+Los modelos de CatBoost, XGBClassifier y Regresión Logística se compararon en términos de precisión (accuracy) y otras métricas relevantes para evaluar su desempeño en la predicción de la variable objetivo, **depression**. Los resultados obtenidos se presentan a continuación:
+
+| **Model**           | **Accuracy** |
+|---------------------|--------------|
+| Regresión Logística | 0.9185       |
+| XGBClassifier       | 0.9398       |
+| CatBoost            | 0.9402       |
+
 ## 6. Conclusiones
+
+En este reporte, exploramos la relación entre diversos factores y la presencia de depresión en adultos mediante técnicas de aprendizaje automático. La depresión, como condición compleja que afecta aspectos emocionales, cognitivos y físicos, requiere un enfoque que permita identificar patrones subyacentes en los datos. A través de modelos como la **Regresión Logística**, el **XGBClassifier** y el **CatBoost**, se analizaron estas relaciones y se evaluó la capacidad predictiva de cada enfoque.
+
+El modelo de **Regresión Logística**, usado como baseline, permitió identificar relaciones lineales entre variables como satisfacción laboral, horas de sueño, y presión académica con la depresión. Su simplicidad y alta interpretabilidad facilitaron una comprensión inicial de cómo cada variable contribuye a predecir la variable objetivo. Sin embargo, su desempeño quedó limitado al no capturar interacciones más complejas entre los factores.
+
+El **XGBClassifier** representó un avance significativo al modelar relaciones no lineales y combinaciones entre variables, como la interacción entre estrés financiero, historial familiar de enfermedades mentales, y satisfacción general. Este modelo ofreció una mayor precisión global y destacó factores clave con mayor peso en la clasificación.
+
+Sin embargo, fue el modelo de **CatBoost** el que demostró ser el más robusto y eficiente en la predicción de la depresión. CatBoost, gracias a su manejo nativo de variables categóricas y su capacidad para regularizar el sobreajuste, obtuvo el mejor desempeño general. Este modelo sobresalió no solo en métricas de evaluación como precisión y AUC-ROC, sino también en su capacidad de interpretabilidad al identificar las variables más influyentes. Las relaciones detectadas entre variables como satisfacción académica, presión laboral, y horas de sueño reflejan un enfoque integral que permite abordar la depresión desde múltiples dimensiones. Este análisis demuestra que el aprendizaje automático, combinado con enfoques avanzados como CatBoost, es una herramienta poderosa para predecir condiciones complejas como la depresión. Las relaciones detectadas entre variables no solo mejoran la capacidad de predicción, sino que también ofrecen insights valiosos para diseñar estrategias preventivas y personalizadas. Al integrar estos modelos en entornos clínicos y de bienestar, es posible mejorar la detección temprana y el tratamiento de la depresión, contribuyendo a una atención más efectiva y centrada en el paciente.
 
 ## 7. Referencias
 
--   Organización Mundial de la Salud (OMS). (2023). Depression. Recuperado de https://www.who.int/es/news-room/fact-sheets/detail/depression
+-   Organización Mundial de la Salud (OMS). (2023). Depression. Recuperado de <https://www.who.int/es/news-room/fact-sheets/detail/depression>
+-   Akiba, T., Sano, S., Yanase, T., Ohta, T., & Koyama, M. (2019). *Optuna: A Next-generation Hyperparameter Optimization Framework*. arXiv. <https://arxiv.org/abs/1907.10902>
+-   Hastie, T., Tibshirani, R., & Friedman, J. (2017). *The elements of statistical learning: Data mining, inference, and prediction* (2nd ed.). Springer. [https://doi.org/10.1007/978-0-387-84858-7](https://hastie.su.domains/ElemStatLearn/)
+-   Kaggle. (n.d.). *Exploring Mental Health Data: Playground Series - Season 4, Episode 11*. <https://www.kaggle.com/competitions/playground-series-s4e11>
+-   Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep learning*. MIT Press. Retrieved from <http://www.deeplearningbook.org>
+-   Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep learning*. MIT Press. <http://www.deeplearningbook.org>
