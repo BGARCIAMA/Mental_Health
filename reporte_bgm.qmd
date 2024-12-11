@@ -376,9 +376,9 @@ fig.update_layout(
 fig.show()
 ```
 
-## 3. Preprocesamiento de datos
+## 3. Preprocesamiento de los datos
 
-### 3.1 Ingenieria de Variables
+### 3.1 Ingenieria de variables
 
 Se añadieron características derivadas para enriquecer el dataset y mejorar el análisis. Estas incluyen:
 
@@ -406,7 +406,7 @@ train = new_feats(train).copy()
 test = new_feats(test).copy()
 ```
 
-Se realizó un proceso de limpieza de datos enfocado en la estandarización de los valores de la columna `degree` en la base de datos. Para ello, estoy utilizando un diccionario de mapeo que normaliza y unifica las diferentes representaciones de títulos académicos. Este mapeo incluye equivalencias entre términos que, aunque diferentes en la base de datos, representan el mismo grado académico.
+Adicionalmente, se realizó un proceso de limpieza de datos enfocado en la estandarización de los valores de la columna `degree` en la base de datos. Para ello, estoy utilizando un diccionario de mapeo que normaliza y unifica las diferentes representaciones de títulos académicos. Este mapeo incluye equivalencias entre términos que, aunque diferentes en la base de datos, representan el mismo grado académico.
 
 Por ejemplo:
 
@@ -457,7 +457,7 @@ train['degree'] = train['degree'].map(degree)
 test['degree'] = test['degree'].map(degree)
 ```
 
-Dado que algunas variables categóricas presentan un gran número de categorías únicas, se implementó una estrategia para agrupar las categorías menos representativas en una etiqueta denominada "Other". Esto asegura que las categorías seleccionadas representen al menos el 90% de los datos, reduciendo la dimensionalidad y facilitando el análisis.
+Dado que algunas variables categóricas presentan un gran número de categorías únicas, se implementó una estrategia para agrupar las categorías menos representativas en una etiqueta denominada "*Other*". Esto asegura que las categorías seleccionadas representen al menos el 90% de los datos, reduciendo la dimensionalidad y facilitando el análisis.
 
 Las columnas ajustadas incluyen:
 
@@ -509,7 +509,7 @@ Tras la agrupación, las variables categóricas principales quedan resumidas con
 train[["city","profession","sleep_duration","dietary_habits","degree"]].describe(include="object")
 ```
 
-### 3.2 Relación variables categóricas y Depresión
+### 3.2 Relación variables categóricas y depresión
 
 ```{python}
 #| echo: false
@@ -569,7 +569,7 @@ catplt(x_var="study_satisfaction")
 
 -   Se observa una clara relación inversa entre la satisfacción en los estudios y la propensión a la depresión. A menor satisfacción académica, mayor es la proporción de casos positivos de depresión, lo que refuerza la importancia del bienestar en el ámbito educativo.
 
-### 3.3 Mapa de correlación entre variable numéricas
+### 3.3 Mapa de correlación entre variables numéricas
 
 ```{python}
 #| echo: false
@@ -595,7 +595,7 @@ plt.yticks(fontsize=9)
 plt.show()
 ```
 
-## 4. Algoritmos y Modelado
+## 4. Algoritmos y modelos
 
 ```{python}
 #| echo: false
@@ -610,7 +610,119 @@ from sklearn.linear_model import LogisticRegression
 
 ### 4.1 Regresión Logística
 
-### 4.2 CatBoost
+La regresión logística, es un modelo estadístico ampliamente utilizado en aprendizaje automático para problemas de clasificación binaria y multiclase. Este modelo se basa en la relación entre una o más variables independientes y una variable dependiente categórica, utilizando una función sigmoide para estimar la probabilidad de pertenencia a una clase específica. La simplicidad y la interpretabilidad de la regresión logística lo convierten en una buena opción para problemas de clasificación, especialmente cuando el objetivo es comprender la relación entre las variables predictoras y la variable objetivo.
+
+Para entrenar el modelo de regresión logística, se manejaron los valores faltantes en el conjunto de datos reemplazándolos con "0". Posteriormente, se seleccionaron las columnas relevantes (pair_cols) para el análisis, asegurando que tanto las variables predictoras como la variable objetivo (`depression`) estuvieran correctamente estructuradas.
+
+El modelo de regresión logística se configuró con un número máximo de iteraciones de 10,000 y se entrenó sobre el conjunto de entrenamiento. Después de ajustar el modelo, su desempeño fue evaluado en el conjunto de prueba, obteniendo una precisión (*accuracy*) de 0.9185. Este resultado establece un punto de referencia (*baseline*) para comparar el desempeño de modelos más complejos.
+
+La regresión logística, con su simplicidad y rapidez, sirve como un modelo inicial para entender la estructura de los datos y evaluar si enfoques más avanzados pueden mejorar significativamente el desempeño en la predicción de la variable objetivo.
+
+```{python}
+#| echo: false
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
+pair_cols = num_feats.append(target)
+logi_train = train.fillna("0")
+logi_test = test.fillna("0")
+
+logi_train = logi_train[pair_cols]
+logit_num_feats_test = pair_cols[:-1]
+logi_test = logi_test[logit_num_feats_test]
+
+logi_y = logi_train["depression"]
+logi_X = logi_train.drop(["depression"], axis=1)
+logi_X_train, logi_X_test, logi_y_train, logi_y_test = train_test_split(
+    logi_X, logi_y, test_size=0.3, random_state=42)
+logi_reg = LogisticRegression(max_iter = 10000)
+logi_reg.fit(logi_X_train, logi_y_train)
+logi_y_pred = logi_reg.predict(logi_X_test)
+print('Accuracy of logistic regression classifier on validation set: {:.6f}'.format(logi_reg.score(logi_X_test, logi_y_test)))
+```
+
+### 4.2 XGBClassifier
+
+El **XGBClassifier**, parte de la biblioteca XGBoost (eXtreme Gradient Boosting), un potente algoritmo de aprendizaje automático basado en árboles de decisión, diseñado específicamente para tareas de clasificación. Este modelo es conocido por su capacidad para manejar grandes volúmenes de datos, trabajar con combinaciones complejas de variables numéricas y categóricas, y optimizar tanto el tiempo de entrenamiento como el rendimiento del modelo. Incluye funcionalidades avanzadas como regularización integrada para reducir el riesgo de sobreajuste y soporte para paralelización, lo que lo hace especialmente eficiente y robusto en problemas de clasificación binaria o multiclase.
+
+Elegimos **XGBClassifier** para este ejercicio porque, además de su capacidad para manejar estructuras complejas, proporciona configuraciones específicas para clasificación, como la función de pérdida `log loss` optimizada para este tipo de problemas. Esto es particularmente útil en nuestro conjunto de datos, que combina variables numéricas y categóricas con una posible presencia de interacciones no lineales.
+
+Nuestro objetivo es comparar el desempeño de **XGBClassifier** frente al modelo baseline de Regresión Logística, evaluando si el uso de un modelo más avanzado mejora significativamente la capacidad predictiva para la variable objetivo, **depression**.
+
+Para entrenar este modelo, el conjunto de datos fue preprocesado de manera similar al modelo baseline, asegurando la limpieza y adecuación de las variables predictoras y objetivo. Se ajustaron hiperparámetros clave como `max_depth`, `learning_rate` y `n_estimators` para optimizar el balance entre el desempeño del modelo y el riesgo de sobreajuste. El desempeño del modelo fue evaluado utilizando métricas como precisión (**accuracy**), la curva ROC-AUC, y una matriz de confusión para visualizar la clasificación y los errores del modelo.
+
+El **XGBClassifier** proporciona una representación más detallada de las relaciones no lineales en los datos y, al estar específicamente diseñado para clasificación, ofrece herramientas optimizadas para este propósito. Su rendimiento será comparado directamente con el modelo baseline para determinar su capacidad de predecir correctamente la presencia de depresión en los datasets analizados.
+
+```{python}
+#| eval: false
+from sklearn.metrics import accuracy_score, roc_auc_score
+from xgboost import XGBClassifier
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42) 
+
+def objective(trial):
+    colsample_bytree = trial.suggest_float('colsample_bytree', 0.5, 1)
+    n_estimators = trial.suggest_int('n_estimators', 600, 5000)
+    learning_rate = trial.suggest_float('learning_rate', 0.07, 0.1)
+    reg_lambda = trial.suggest_float('reg_lambda', 0, 1)
+    reg_alpha = trial.suggest_float('reg_alpha', 1, 3)
+    max_depth = trial.suggest_int('max_depth', 8, 15)
+    gamma = trial.suggest_float('gamma', 0.2, 0.5)
+    eval_metric = 'auc'
+    
+    model = XGBClassifier(
+        colsample_bytree=colsample_bytree,
+        n_estimators=n_estimators,
+        learning_rate=learning_rate,
+        max_depth=max_depth,
+        reg_alpha=reg_alpha,
+        reg_lambda=reg_lambda,
+        gamma=gamma,
+        eval_metric=eval_metric,
+        random_state=42)
+    
+    model.fit(X_train, y_train)
+    
+    y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)[:, 1]
+    
+    roc_auc = roc_auc_score(y_test, y_proba)
+    accuracy = accuracy_score(y_test, y_pred)
+        
+    return accuracy, roc_auc
+```
+
+```{python}
+best_params_xgbc = {
+'colsample_bytree': 0.6065523520125417, 
+'n_estimators': 737, 
+'learning_rate': 0.08955000476127656, 
+'reg_lambda': 0.36852634372376114, 
+'reg_alpha': 2.7287164996792743, 
+'max_depth': 11, 
+'gamma': 0.49045802837441654
+}
+```
+
+```{python}
+#| echo: false
+import pandas as pd
+general_metrics = pd.DataFrame({
+    'Metric': ['Accuracy', 'ROC-AUC'],
+    'Value': [0.939825, 0.975605]})
+
+classification_metrics = pd.DataFrame.from_dict({
+        'precision': [0.960072, 0.846847, 0.939825, 0.903459, 0.939213],
+        'recall': [0.966429, 0.822016, 0.939825, 0.894222, 0.939825],
+        'f1-score': [0.963240, 0.834247, 0.939825, 0.898743, 0.939476],
+        'support': [34434.0, 7776.0, 42210.0, 42210.0, 42210.0]},
+    orient='index',
+    columns=['Class 0', 'Class 1', 'accuracy', 'macro avg', 'weighted avg'])
+general_metrics
+```
+
+### 4.3 CatBoost
 
 CatBoost es un algoritmo de aprendizaje automático basado en árboles de decisión que utiliza técnicas avanzadas de boosting. Es especialmente útil para trabajar con datos categóricos, ya que implementa un manejo eficiente de estas variables mediante codificación automática, lo que reduce la necesidad de preprocesamiento adicional. Además, CatBoost es conocido por su capacidad de minimizar el riesgo de sobreajuste y su alto desempeño en tareas de clasificación y regresión.
 
@@ -620,7 +732,7 @@ Para entrenar el modelo, el dataset se preprocesó llenando valores faltantes co
 
 ```{python}
 #| echo: false
-#| label: Catboost
+#| label: CatBoost
 cat_train = train.fillna("0")
 cat_test = test.fillna("0")
 cat_train[num_feats] = cat_train[num_feats].astype("float64")
@@ -669,13 +781,17 @@ def objective(trial):
     return score
 ```
 
-Función Objetivo
+**Función Objetivo**
 
 La función objetivo se define como el promedio de la precisión obtenida mediante validación cruzada con 3 particiones ($k=3$):
 
 $$\text{Score} = \frac{1}{k} \sum_{i=1}^{k} \text{Accuracy}(i)$$
 
-Donde $\text{Accuracy}(i)$ es la precisión en el $i$-ésimo fold de la validación cruzada. El modelo de CatBoost se entrena y evalúa en cada iteración con una combinación específica de hiperparámetros sugerida por Optuna.
+Donde
+
+$\text{Accuracy}(i)$ es la precisión en el $i$-ésimo fold de la validación cruzada.
+
+El modelo de CatBoost se entrena y evalúa en cada iteración con una combinación específica de hiperparámetros sugerida por Optuna.
 
 ```{python}
 best_params = {'iterations': 633,
@@ -711,7 +827,6 @@ for i, (full_train_idx, valid_idx) in enumerate(cat_cv_splits):
     acc_scores.append(score)
     test_df_pred = model_fold.predict_proba(X_test_df_pool)[:, 1]
     last_test_df_preds.append(test_df_pred)
-    print(f'Fold {i + 1} Accuracy Score: {score}')
 ```
 
 Fold 1 Accuracy Score: 0.9383
@@ -740,6 +855,28 @@ from sklearn.metrics import classification_report
 print(classification_report(y_valid_fold, valid_pred))
 ```
 
-## 8. Referencias
+```{python}
+#| echo: false
+import pandas as pd
+metrica = pd.DataFrame({
+    'Metric': ['Accuracy'],
+    'Value': [0.9402061122956645]})
+
+metrica
+```
+
+## 5. Selección de modelo
+
+De acuerdo a la métrica que se seleccionó, el mejor modelo es un CatBoost
+
+### 5.1 Optimización de hiperparámetros
+
+### 5.2 Validación cruzada
+
+### 5.3 Comparación de modelos
+
+## 6. Conclusiones
+
+## 7. Referencias
 
 -   Organización Mundial de la Salud (OMS). (2023). Depression. Recuperado de https://www.who.int/es/news-room/fact-sheets/detail/depression
