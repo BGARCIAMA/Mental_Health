@@ -181,9 +181,7 @@ plt.title("Distribución de la variable Depresión", fontsize=14)
 plt.show()
 ```
 
--   El análisis de la variable objetivo `depression` revela un conjunto de datos desbalanceado, donde aproximadamente el 82% de los registros corresponden a individuos sin depresión y solo el 18% a casos positivos. Esta desigualdad es visualmente evidente en la gráfica de distribución.
-
--   El desbalance en la variable objetivo establece un desafío en el modelado predictivo, ya que los modelos pueden inclinarse hacia la clase mayoritaria. Sin embargo, también sugiere que un punto de referencia inicial para la métrica de precisión (*accuracy*) debe superar el 82%, ya que ese sería el desempeño esperado al predecir siempre la clase mayoritaria.
+-   El análisis de la variable objetivo `depression` revela un conjunto de datos ligeramente desbalanceado, donde aproximadamente el 82% de los registros corresponden a individuos sin depresión y solo el 18% a casos positivos. Esta desigualdad es visualmente evidente en la gráfica de distribución.
 
 ### 2.5. Valores Nulos
 
@@ -406,7 +404,7 @@ train = new_feats(train).copy()
 test = new_feats(test).copy()
 ```
 
-Adicionalmente, se realizó un proceso de limpieza de datos enfocado en la estandarización de los valores de la columna `degree` en la base de datos. Para ello, estoy utilizando un diccionario de mapeo que normaliza y unifica las diferentes representaciones de títulos académicos. Este mapeo incluye equivalencias entre términos que, aunque diferentes en la base de datos, representan el mismo grado académico.
+Adicionalmente, se realizó un proceso de limpieza de datos enfocado en la estandarización de los valores de la columna `degree` en la base de datos. Para ello, estamos utilizando un diccionario de mapeo que normaliza y unifica las diferentes representaciones de títulos académicos. Este mapeo incluye equivalencias entre términos que, aunque diferentes en la base de datos, representan el mismo grado académico.
 
 Por ejemplo:
 
@@ -494,7 +492,8 @@ def group_low_frequency(train, test, column, threshold_percentage):
 ```
 
 ```{python}
-
+#| echo: false
+#| label: agrupar low_frequency
 train["city"], test["city"] = group_low_frequency(train, test, 'city', 0.9)
 train["profession"], test["profession"] = group_low_frequency(train, test, 'profession', 0.9)
 train["sleep_duration"], test["sleep_duration"] = group_low_frequency(train, test, 'sleep_duration', 0.9)
@@ -724,11 +723,9 @@ general_metrics
 
 ### 4.3 CatBoost
 
-CatBoost es un algoritmo de aprendizaje automático basado en árboles de decisión que utiliza técnicas avanzadas de boosting. Es especialmente útil para trabajar con datos categóricos, ya que implementa un manejo eficiente de estas variables mediante codificación automática, lo que reduce la necesidad de preprocesamiento adicional. Además, CatBoost es conocido por su capacidad de minimizar el riesgo de sobreajuste y su alto desempeño en tareas de clasificación y regresión.
+CatBoost es un algoritmo de aprendizaje automático basado en árboles de decisión que utiliza técnicas avanzadas de boosting. Es especialmente útil para trabajar con datos categóricos, ya que implementa un manejo eficiente de estas variables mediante codificación *Ordered Target Encoding*, lo que reduce la necesidad de preprocesamiento adicional. Además, CatBoost es conocido por su capacidad de minimizar el riesgo de sobreajuste y su alto desempeño en tareas de clasificación y regresión.
 
-Elegimos CatBoost para este ejercicio debido a la naturaleza del dataset, que contiene una combinación de variables numéricas y categóricas. Su capacidad para procesar variables categóricas de forma nativa, junto con su robustez frente al desbalance de datos, lo hace ideal para predecir nuestra variable objetivo, **depression**, en un conjunto de datos con estructuras y distribuciones complejas. Además, el rendimiento competitivo de CatBoost en comparación con otros algoritmos de boosting lo convierte en una opción sólida para este tipo de problema.
-
-Para entrenar el modelo, el dataset se preprocesó llenando valores faltantes con "0" y ajustando los tipos de datos según la naturaleza de las variables (numéricas, categóricas y objetivo). Posteriormente, se dividieron los datos en conjuntos de entrenamiento y prueba, utilizando el 70% de los datos para entrenamiento y el 30% para prueba. Este procedimiento garantiza una evaluación justa del modelo, preservando datos no vistos para validar su desempeño y evitar el sobreajuste.
+Elegimos probar CatBoost para este ejercicio debido a la naturaleza del dataset, que contiene una combinación de variables numéricas y categóricas. Para entrenar el modelo, el dataset se preprocesó llenando valores faltantes con "0" y ajustando los tipos de datos según la naturaleza de las variables (numéricas, categóricas y objetivo).
 
 ```{python}
 #| echo: false
@@ -754,7 +751,7 @@ print(y.shape)
 
 ```
 
-En este paso, utilizamos Optuna, una biblioteca eficiente para la optimización de hiperparámetros, con el objetivo de encontrar la mejor configuración para el modelo de CatBoostClassifier. La función de optimización busca maximizar el desempeño del modelo en términos de precisión (accuracy) utilizando un enfoque basado en validación cruzada. Espacio de Búsqueda
+Después utilizamos Optuna, una biblioteca eficiente para la optimización de hiperparámetros, con el objetivo de encontrar la mejor configuración para el modelo de CatBoostClassifier. La función de optimización busca maximizar el desempeño del modelo en términos de precisión (accuracy) utilizando un enfoque basado en validación cruzada. Espacio de Búsqueda
 
 El espacio de búsqueda incluye los siguientes hiperparámetros:
 
@@ -804,8 +801,11 @@ best_params = {'iterations': 633,
  'random_strength': 0.664861942866057}
 ```
 
+Para posteriormente entrenar el modelo en partes, utilizando validación cruzada estratificada, con los parámetros obtenidos por *Optuna* para luego predecir la probabilidad de depresión en un conjunto de datos de prueba independiente. Básicamente divide los datos en grupos, entrena el modelo en un grupo y valida su rendimiento en otro, repitiendo esto para 20 grupos.
+
 ```{python}
 #| eval: false
+#| echo: false
 #| label: Catboost run
 cat_interp = CatBoostClassifier(**best_params, verbose=True, cat_features=X[obj_feats].columns.values, early_stopping_rounds=200)
 cat_cv_last = StratifiedKFold(20, shuffle=True, random_state=42)
@@ -829,41 +829,47 @@ for i, (full_train_idx, valid_idx) in enumerate(cat_cv_splits):
     last_test_df_preds.append(test_df_pred)
 ```
 
-Fold 1 Accuracy Score: 0.9383
+| **Fold**    | **Accuracy Score**    |
+|-------------|-----------------------|
+| Fold 1      | 0.938308    |
+| Fold 2      | 0.942075    |
+| Fold 3      | 0.937597    |
+| Fold 4      | 0.938948    |
+| $\dots$     | $\dots$    |
+| Fold 16      | 0.940724     |
+| Fold 17      | 0.939658    |
+| Fold 18      | 0.942928    |
+| Fold 19      | 0.940369    |
+| Fold 20     | 0.939516    |
 
-Fold 2 Accuracy Score: 0.9420
 
-Fold 3 Accuracy Score: 0.9375
-
-Fold 4 Accuracy Score: 0.9389
-
-Fold 5 Accuracy Score: 0.9419
-
-Fold 6 Accuracy Score: 0.9407
-
-Fold 7 Accuracy Score: 0.9396
-
-Fold 8 Accuracy Score: 0.9429
-
-Fold 9 Accuracy Score: 0.9403
-
-Fold 10 Accuracy Score: 0.9395
-
-```{python}
-#| eval: false
-from sklearn.metrics import classification_report
-print(classification_report(y_valid_fold, valid_pred))
-```
+Dando como principales indicadores para medir el desempeño del modelo lo siguiente:
 
 ```{python}
 #| echo: false
 import pandas as pd
 metrica = pd.DataFrame({
-    'Metric': ['Accuracy'],
-    'Value': [0.9402061122956645]})
+    'Metric': ['Accuracy','ROC_AUC'],
+    'Value': [0.940206,0.975888]}
+)
 
 metrica
 ```
+
+
+**Análisis de la Curva ROC**
+
+![ROC CatBoosts](img/cat_boost.png)
+
+Para evaluar el desempeño del modelo de clasificación, se construyó una curva ROC (Receiver Operating Characteristic). Esta curva ilustra la relación entre la tasa de verdaderos positivos (sensibilidad) y la tasa de falsos positivos (1-especificidad) para diferentes umbrales 1  de clasificación. El área bajo la curva ROC (AUC) es una medida resumida del rendimiento del modelo, donde un valor cercano a 1 indica una excelente capacidad discriminatoria. En este caso, el modelo obtuvo un AUC de $0.9758$, lo cual sugiere un alto poder predictivo. 
+
+Sin embargo, en el contexto de la detección de la depresión, minimizar la tasa de falsos negativos es de suma importancia. Un falso negativo implica que el modelo clasifica erróneamente a un individuo con depresión como no deprimido, lo que podría retrasar el acceso a tratamientos adecuados. Por esta razón, buscamos mover el threshold para la clasificación hacia la derecha incrementando el _False Positive Rate_.
+
+Para identificar un punto de corte adecuado, se realizó un análisis visual de la curva ROC y calculando el punto óptimo en la curva se obtuvo aproximadamente $0.25$ como Threshold. Este punto de corte permite obtener una alta sensibilidad, es decir, una alta probabilidad de detectar correctamente a los individuos con depresión, al tiempo que se mantiene una tasa de falsos positivos aceptable.
+
+![Matrix CatBoosts](img/matrix_catboots.png)
+
+Es importante destacar que la elección del punto de corte implica un equilibrio entre sensibilidad y especificidad. Un punto de corte más conservador (menor tasa de falsos positivos) podría disminuir la cantidad de falsos negativos, pero también reduciría la sensibilidad del modelo. Por tanto, la decisión final debe considerar las implicaciones clínicas y los costos asociados a los falsos positivos y falsos negativos.
 
 ## 5. Selección de modelo
 
@@ -980,7 +986,7 @@ El modelo de **Regresión Logística**, usado como baseline, permitió identific
 
 El **XGBClassifier** representó un avance significativo al modelar relaciones no lineales y combinaciones entre variables, como la interacción entre estrés financiero, historial familiar de enfermedades mentales, y satisfacción general. Este modelo ofreció una mayor precisión global y destacó factores clave con mayor peso en la clasificación.
 
-Sin embargo, fue el modelo de **CatBoost** el que demostró ser el más robusto y eficiente en la predicción de la depresión. CatBoost, gracias a su manejo nativo de variables categóricas y su capacidad para regularizar el sobreajuste, obtuvo el mejor desempeño general. Este modelo sobresalió no solo en métricas de evaluación como precisión y AUC-ROC, sino también en su capacidad de interpretabilidad al identificar las variables más influyentes. Las relaciones detectadas entre variables como satisfacción académica, presión laboral, y horas de sueño reflejan un enfoque integral que permite abordar la depresión desde múltiples dimensiones. Este análisis demuestra que el aprendizaje automático, combinado con enfoques avanzados como CatBoost, es una herramienta poderosa para predecir condiciones complejas como la depresión. Las relaciones detectadas entre variables no solo mejoran la capacidad de predicción, sino que también ofrecen insights valiosos para diseñar estrategias preventivas y personalizadas. Al integrar estos modelos en entornos clínicos y de bienestar, es posible mejorar la detección temprana y el tratamiento de la depresión, contribuyendo a una atención más efectiva y centrada en el paciente.
+Sin embargo, fue el modelo de **CatBoost** el que demostró ser el más robusto y eficiente en la predicción de la depresión. CatBoost, gracias a su manejo nativo de variables categóricas y su capacidad para regularizar el sobreajuste, obtuvo el mejor desempeño general. Este modelo sobresalió no solo en métricas de evaluación como precisión y AUC-ROC, sino también en su capacidad de interpretabilidad al identificar las variables más influyentes. Las relaciones detectadas entre variables como satisfacción académica, presión laboral, y horas de sueño reflejan un enfoque integral que permite abordar la depresión desde múltiples dimensiones. Este análisis demuestra que el aprendizaje automático, combinado con enfoques avanzados como CatBoost, es una herramienta poderosa para predecir condiciones complejas como la depresión. Las relaciones detectadas entre variables no solo mejoran la capacidad de predicción, sino que también ofrecen insights valiosos para diseñar estrategias preventivas y personalizadas. Al integrar estos modelos en entornos clínicos y de bienestar, es posible mejorar la **detección temprana** y el tratamiento de la depresión, contribuyendo a una atención más efectiva y centrada en el paciente.
 
 ## 7. Referencias
 
