@@ -50,8 +50,6 @@ La encuesta fue llevada a cabo de manera anónima entre enero y junio de 2023 en
 
 Los participantes, con edades entre 18 y 60 años, compartieron voluntariamente información sobre una amplia variedad de aspectos, tales como edad, género, ciudad de residencia, entre otros.
 
-La variable objetivo, "Depresión", representa si el individuo está en riesgo de depresión, marcada como "Sí" o "No", en función de sus respuestas a factores demográficos y de estilo de vida. El conjunto de datos ha sido seleccionado para brindar información sobre cómo los factores cotidianos pueden correlacionarse con los riesgos para la salud mental.
-
 Cabe destacar, que se asume correcta lo reportado en el data set de Kaggle sobre si el adulto tiene o no depresión.
 
 ### 1.3. Objetivos
@@ -80,7 +78,7 @@ Es esta sección, se presentará el resultado del análisis exploratorio de los 
 El dataset está compuesto por 20 variables, descritas a continuación:
 
 | Variable | Descripción |
-|----|----|
+|------------------------------|------------------------------------------|
 | `id` | Identificador único del registro |
 | `Nombre` | Nombre del participante |
 | `Género` | Género del participante |
@@ -202,10 +200,10 @@ percentage_df = pd.DataFrame({
 # Filtrar solo columnas con valores nulos
 percentage_df = percentage_df[null_percentage > 0]
 # Gráfico apilado
-percentage_df.plot(kind='bar', stacked=True, figsize=(8, 4), color=['red', 'green'])
+percentage_df.plot(kind='bar', stacked=True, figsize=(8, 6), color=['red', 'green'])
 plt.title("Porcentaje de Valores Nulos")
 plt.ylabel("Porcentaje (%)")
-plt.xticks(rotation=90)
+plt.xticks(rotation=45)
 plt.legend(loc='upper right')
 plt.show()
 ```
@@ -287,7 +285,7 @@ for column in num_to_plot:
 
 -   En cuanto a `cgpa`, se observa que tienen una distribución similar entre los adultos que tienen o no depresión.
 
--   Para work/study_hours, se puede observar que los adultos que pasan entre 8 y 12 horas en el trabajo o estudiando, tienen mayor incidencia de tener depresion.
+-   Para work/study_hours,
 
 ```{python}
 #| echo: false
@@ -317,7 +315,7 @@ plt.axis("off")
 plt.show()
 ```
 
--   En cuanto a ocupaciones, destaca una alta proporción de personas en el sector educativo, específicamente profesores.
+-   En cuanto a ocupaciones, destaca una alta proporción de personas en el sector educativo, específicamente profesores, que constituyen la profesión predominante.
 
 ```{python}
 #| echo: false
@@ -368,20 +366,20 @@ fig.show()
 
 Se añadieron características derivadas para enriquecer el dataset y mejorar el análisis. Estas incluyen:
 
--   `press_sat_by_work`: Relación entre presión laboral y satisfacción en el trabajo.
--   ``` press_sat``_by_study ```: Relación entre presión y satisfacción académica.
+-   `satisfaction_by_work`: Relación entre presión laboral y satisfacción en el trabajo.
+-   `satisfaction_by_study`: Relación entre presión y satisfacción académica.
 -   `age_work_satisfaction`: Razón entre edad y satisfacción laboral.
 -   `cgpa_study`: Relación entre promedio académico y presión académica.
 
-Estas nuevas variables buscan capturar interacciones clave, como el efecto de la presión en la satisfacción o el desempeño bajo diferentes condiciones, y tienen el potencial de mejorar el modelo. Las varibales se crean con la siguiente función:
+Estas nuevas variables buscan capturar interacciones clave, como el impacto de la presión en la satisfacción o el desempeño bajo diferentes condiciones, y tienen el potencial de mejorar el modelo predictivo. Las varibales se crean con la siguiente función:
 
 ```{python}
 #| label: new feats
 def new_feats(df):
     df = (
-        df.assign(press_sat_by_work=df["work_pressure"] / df["job_satisfaction"])
+        df.assign(satisfaction_by_work=df["work_pressure"] / df["job_satisfaction"])
         .assign(
-            press_sat_by_study=df["academic_pressure"] / df["study_satisfaction"]
+            satisfaction_by_study=df["academic_pressure"] / df["study_satisfaction"]
         )
         .assign(age_work_satisfaction=df["age"] / df["job_satisfaction"])
         .assign(cgpa_study=df["cgpa"] / df["academic_pressure"])
@@ -392,7 +390,7 @@ train = new_feats(train).copy()
 test = new_feats(test).copy()
 ```
 
-Adicionalmente, se realizó un proceso de limpieza de datos enfocado en la estandarización de los valores de la columna `degree` en la base de datos. Para ello, se utilizó un diccionario de mapeo que normaliza y unifica las diferentes representaciones de títulos académicos. Este mapeo incluye equivalencias entre términos que, aunque diferentes en la base de datos, representan el mismo grado académico.
+Adicionalmente, se realizó un proceso de limpieza de datos enfocado en la estandarización de los valores de la columna `degree` en la base de datos. Para ello, estoy utilizando un diccionario de mapeo que normaliza y unifica las diferentes representaciones de títulos académicos. Este mapeo incluye equivalencias entre términos que, aunque diferentes en la base de datos, representan el mismo grado académico.
 
 Por ejemplo:
 
@@ -405,6 +403,7 @@ Por ejemplo:
 El propósito de este procedimiento es garantizar la consistencia en los valores de la columna, facilitando análisis posteriores y mejorando la calidad del modelo al trabajar con datos limpios y estandarizados. La misma transformación se aplica tanto al conjunto de entrenamiento como al de prueba para mantener la uniformidad entre ambos datasets.
 
 ```{python}
+#| echo: false
 degree = {
     "BCom": "B.Com", "B.Com": "B.Com", "B.Comm": "B.Com",
     "B.Tech": "B.Tech", "BTech": "B.Tech", "B.T": "B.Tech",
@@ -442,7 +441,7 @@ train['degree'] = train['degree'].map(degree)
 test['degree'] = test['degree'].map(degree)
 ```
 
-Dado que algunas variables categóricas presentan un gran número de valores únicos, se implementó una estrategia para agrupar las menos representativas en una etiqueta denominada "*Other*". Esto asegura que las categorías seleccionadas representen al menos el 90% de los datos, reduciendo la dimensionalidad y facilitando el análisis.
+Dado que algunas variables categóricas presentan un gran número de categorías únicas, se implementó una estrategia para agrupar las categorías menos representativas en una etiqueta denominada "*Other*". Esto asegura que las categorías seleccionadas representen al menos el 90% de los datos, reduciendo la dimensionalidad y facilitando el análisis.
 
 Las columnas ajustadas incluyen:
 
@@ -479,6 +478,7 @@ def group_low_frequency(train, test, column, threshold_percentage):
 ```
 
 ```{python}
+
 train["city"], test["city"] = group_low_frequency(train, test, 'city', 0.9)
 train["profession"], test["profession"] = group_low_frequency(train, test, 'profession', 0.9)
 train["sleep_duration"], test["sleep_duration"] = group_low_frequency(train, test, 'sleep_duration', 0.9)
@@ -486,7 +486,7 @@ train["dietary_habits"], test["dietary_habits"] = group_low_frequency(train, tes
 train["degree"], test["degree"] = group_low_frequency(train, test, 'degree', 0.9)
 ```
 
-Tras la agrupación, las variables categóricas principales quedan resumidas con las valores más representativos
+Tras la agrupación, las variables categóricas principales quedan resumidas con las categorías más representativas
 
 ```{python}
 #| echo: false
@@ -530,28 +530,28 @@ def catplt(x_var, aspect = 4):
 catplt(x_var="work/study_hours", aspect= 8)
 ```
 
--   El análisis gráfico de la variable `work/study_hours` muestra un patrón interesante, ya que a medida que aumentan las horas dedicadas al trabajo o estudio, también aumenta la proporción de adultos con depresión.
+-   El análisis gráfico de la variable `work/study_hours` muestra un patrón interesante, ya que a medida que aumentan las horas dedicadas al trabajo o estudio, también aumenta la proporción de casos con indicadores de depresión.
 
 ```{python}
 #| echo: false
 catplt(x_var="working_professional_or_student")
 ```
 
--   Los resultados de `working_professional_or_student`, muestran que más de la mitad de los estudiantes en el dataset tienen depresión. Esto resalta una diferencia notable en comparación con los profesionales, sugiriendo que el entorno académico puede ser un factor relevante en la clasificación.
+-   Los resultados muestran que más de la mitad de los estudiantes en el dataset tienen indicadores de depresión. Esto resalta una diferencia notable en comparación con los profesionales, sugiriendo que el entorno académico puede ser un factor de estrés significativo.
 
 ```{python}
 #| echo: false
 catplt(x_var="gender")
 ```
 
--   En cuanto a `gender`, se identifica que aunque hay más hombres con depresión en términos absolutos, los porcentajes de depresión entre hombres y mujeres son similares, alrededor del 18%. Esto indica que la distribución de la variable objetivo no presenta un sesgo significativo entre géneros.
+-   Aunque hay más hombres con depresión en términos absolutos, los porcentajes de depresión entre hombres y mujeres son similares, alrededor del 18%. Esto indica que la distribución de la variable objetivo no presenta un sesgo significativo entre géneros.
 
 ```{python}
 #| echo: false
 catplt(x_var="study_satisfaction")
 ```
 
--   Para `study_satisfaction`, se observa una clara relación inversa entre la satisfacción en los estudios y los adultos con depresión. A menor satisfacción académica, mayor es la proporción de casos positivos de depresión.
+-   Se observa una clara relación inversa entre la satisfacción en los estudios y la propensión a la depresión. A menor satisfacción académica, mayor es la proporción de casos positivos de depresión, lo que refuerza la importancia del bienestar en el ámbito educativo.
 
 ### 3.3 Mapa de correlación entre variables numéricas
 
@@ -600,7 +600,7 @@ Para entrenar el modelo de regresión logística, se manejaron los valores falta
 
 El modelo de regresión logística se configuró con un número máximo de iteraciones de 10,000 y se entrenó sobre el conjunto de entrenamiento. Después de ajustar el modelo, su desempeño fue evaluado en el conjunto de prueba, obteniendo una precisión (*accuracy*) de 0.9185. Este resultado establece un punto de referencia (*baseline*) para comparar el desempeño de modelos más complejos.
 
-La regresión logística, con su simplicidad y rapidez, sirve como un modelo inicial para entender la estructura de los datos y evaluar si enfoques más avanzados pueden mejorar significativamente el desempeño en lel modelo de clasificación.
+La regresión logística, con su simplicidad y rapidez, sirve como un modelo inicial para entender la estructura de los datos y evaluar si enfoques más avanzados pueden mejorar significativamente el desempeño en la predicción de la variable objetivo.
 
 ```{python}
 #| echo: false
@@ -625,40 +625,15 @@ logi_y_pred = logi_reg.predict(logi_X_test)
 print('Accuracy of logistic regression classifier on validation set: {:.6f}'.format(logi_reg.score(logi_X_test, logi_y_test)))
 ```
 
-```{python}
-#| echo: false
-from sklearn.metrics import (
-    accuracy_score,
-    classification_report,
-    confusion_matrix,
-    roc_auc_score,
-    roc_curve
-)
-
-logit_roc_auc = roc_auc_score(logi_y_test, logi_reg.predict(logi_X_test))
-fpr, tpr, thresholds = roc_curve(logi_y_test, logi_reg.predict_proba(logi_X_test)[:,1])
-plt.figure()
-plt.plot(fpr, tpr, label='Logistic Regression (area = %0.6f)' % logit_roc_auc)
-plt.plot([0, 1], [0, 1],'y-.')
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('Receiver operating characteristic')
-plt.legend(loc="lower right")
-plt.savefig('Log_ROC')
-plt.show()
-```
-
 ### 4.2 XGBClassifier
 
 El **XGBClassifier**, parte de la biblioteca XGBoost (eXtreme Gradient Boosting), un potente algoritmo de aprendizaje automático basado en árboles de decisión, diseñado específicamente para tareas de clasificación. Este modelo es conocido por su capacidad para manejar grandes volúmenes de datos, trabajar con combinaciones complejas de variables numéricas y categóricas, y optimizar tanto el tiempo de entrenamiento como el rendimiento del modelo. Incluye funcionalidades avanzadas como regularización integrada para reducir el riesgo de sobreajuste y soporte para paralelización, lo que lo hace especialmente eficiente y robusto en problemas de clasificación binaria o multiclase.
 
 Elegimos **XGBClassifier** para este ejercicio porque, además de su capacidad para manejar estructuras complejas, proporciona configuraciones específicas para clasificación, como la función de pérdida `log loss` optimizada para este tipo de problemas. Esto es particularmente útil en nuestro conjunto de datos, que combina variables numéricas y categóricas con una posible presencia de interacciones no lineales.
 
-Nuestro objetivo es comparar el desempeño de **XGBClassifier** frente al modelo baseline de Regresión Logística, evaluando si el uso de un modelo más avanzado mejora significativamente la capacidad de clasificación de manera correcta.
+Nuestro objetivo es comparar el desempeño de **XGBClassifier** frente al modelo baseline de Regresión Logística, evaluando si el uso de un modelo más avanzado mejora significativamente la capacidad predictiva para la variable objetivo, **depression**.
 
-Para entrenar este modelo, el conjunto de datos fue preprocesado de manera similar al modelo baseline, asegurando la limpieza y adecuación de las variables predictoras y objetivo. Se ajustaron hiperparámetros clave como `max_depth`, `learning_rate` y `n_estimators` para optimizar el balance entre el desempeño del modelo y el riesgo de sobreajuste. El desempeño del modelo fue evaluado utilizando métricas como precisión (**accuracy**) y la curva ROC-AUC.
+Para entrenar este modelo, el conjunto de datos fue preprocesado de manera similar al modelo baseline, asegurando la limpieza y adecuación de las variables predictoras y objetivo. Se ajustaron hiperparámetros clave como `max_depth`, `learning_rate` y `n_estimators` para optimizar el balance entre el desempeño del modelo y el riesgo de sobreajuste. El desempeño del modelo fue evaluado utilizando métricas como precisión (**accuracy**), la curva ROC-AUC, y una matriz de confusión para visualizar la clasificación y los errores del modelo.
 
 El **XGBClassifier** proporciona una representación más detallada de las relaciones no lineales en los datos y, al estar específicamente diseñado para clasificación, ofrece herramientas optimizadas para este propósito. Su rendimiento será comparado directamente con el modelo baseline para determinar su capacidad de predecir correctamente la presencia de depresión en los datasets analizados.
 
@@ -733,9 +708,11 @@ general_metrics
 
 ### 4.3 CatBoost
 
-CatBoost es un algoritmo de aprendizaje automático basado en árboles de decisión que utiliza técnicas avanzadas de boosting. Es especialmente útil para trabajar con datos categóricos, ya que implementa un manejo eficiente de estas variables mediante codificación *Ordered Target Encoding*, lo que reduce la necesidad de preprocesamiento adicional. Además, CatBoost es conocido por su capacidad de minimizar el riesgo de sobreajuste y su alto desempeño en tareas de clasificación y regresión.
+CatBoost es un algoritmo de aprendizaje automático basado en árboles de decisión que utiliza técnicas avanzadas de boosting. Es especialmente útil para trabajar con datos categóricos, ya que implementa un manejo eficiente de estas variables mediante codificación automática, lo que reduce la necesidad de preprocesamiento adicional. Además, CatBoost es conocido por su capacidad de minimizar el riesgo de sobreajuste y su alto desempeño en tareas de clasificación y regresión.
 
-Elegimos probar CatBoost para este ejercicio debido a la naturaleza del dataset, que contiene una combinación de variables numéricas y categóricas. Para entrenar el modelo, el dataset se preprocesó llenando valores faltantes con "0" y ajustando los tipos de datos según la naturaleza de las variables (numéricas, categóricas y objetivo).
+Elegimos CatBoost para este ejercicio debido a la naturaleza del dataset, que contiene una combinación de variables numéricas y categóricas. Su capacidad para procesar variables categóricas de forma nativa, junto con su robustez frente al desbalance de datos, lo hace ideal para predecir nuestra variable objetivo, **depression**, en un conjunto de datos con estructuras y distribuciones complejas. Además, el rendimiento competitivo de CatBoost en comparación con otros algoritmos de boosting lo convierte en una opción sólida para este tipo de problema.
+
+Para entrenar el modelo, el dataset se preprocesó llenando valores faltantes con "0" y ajustando los tipos de datos según la naturaleza de las variables (numéricas, categóricas y objetivo). Posteriormente, se dividieron los datos en conjuntos de entrenamiento y prueba, utilizando el 70% de los datos para entrenamiento y el 30% para prueba. Este procedimiento garantiza una evaluación justa del modelo, preservando datos no vistos para validar su desempeño y evitar el sobreajuste.
 
 ```{python}
 #| echo: false
@@ -758,9 +735,10 @@ print(X.shape)
 print("*************************************")
 print("----------y Shape------------")
 print(y.shape)
+
 ```
 
-En este paso, utilizamos Optuna, una biblioteca eficiente para la optimización de hiperparámetros, con el objetivo de encontrar la mejor configuración para el modelo de CatBoostClassifier. La función de optimización busca maximizar el desempeño del modelo en términos de precisión (*accuracy*) utilizando un enfoque basado en validación cruzada. Espacio de Búsqueda
+En este paso, utilizamos Optuna, una biblioteca eficiente para la optimización de hiperparámetros, con el objetivo de encontrar la mejor configuración para el modelo de CatBoostClassifier. La función de optimización busca maximizar el desempeño del modelo en términos de precisión (accuracy) utilizando un enfoque basado en validación cruzada. Espacio de Búsqueda
 
 El espacio de búsqueda incluye los siguientes hiperparámetros:
 
@@ -810,11 +788,8 @@ best_params = {'iterations': 633,
  'random_strength': 0.664861942866057}
 ```
 
-Para posteriormente entrenar el modelo en partes, utilizando validación cruzada estratificada, con los parámetros obtenidos por *Optuna* para luego clasificar si un adulto tiene depresión en un conjunto de datos de prueba independiente. Básicamente divide los datos en grupos, entrena el modelo en un grupo y valida su rendimiento en otro, repitiendo esto para 20 grupos.
-
 ```{python}
 #| eval: false
-#| echo: false
 #| label: Catboost run
 cat_interp = CatBoostClassifier(**best_params, verbose=True, cat_features=X[obj_feats].columns.values, early_stopping_rounds=200)
 cat_cv_last = StratifiedKFold(20, shuffle=True, random_state=42)
@@ -838,30 +813,30 @@ for i, (full_train_idx, valid_idx) in enumerate(cat_cv_splits):
     last_test_df_preds.append(test_df_pred)
 ```
 
-| **Fold** | **Accuracy Score** |
-|----------|--------------------|
-| Fold 1   | 0.938308           |
-| Fold 2   | 0.942075           |
-| Fold 3   | 0.937597           |
-| Fold 4   | 0.938948           |
-| $\dots$  | $\dots$            |
-| Fold 16  | 0.940724           |
-| Fold 17  | 0.939658           |
-| Fold 18  | 0.942928           |
-| Fold 19  | 0.940369           |
-| Fold 20  | 0.939516           |
+Fold 1 Accuracy Score: 0.9383
 
-Dando como principales indicadores para medir el desempeño del modelo lo siguiente:
+Fold 2 Accuracy Score: 0.9420
+
+Fold 3 Accuracy Score: 0.9375
+
+Fold 4 Accuracy Score: 0.9389
+
+Fold 5 Accuracy Score: 0.9419
+
+Fold 6 Accuracy Score: 0.9407
+
+Fold 7 Accuracy Score: 0.9396
+
+Fold 8 Accuracy Score: 0.9429
+
+Fold 9 Accuracy Score: 0.9403
+
+Fold 10 Accuracy Score: 0.9395
 
 ```{python}
-#| echo: false
-import pandas as pd
-metrica = pd.DataFrame({
-    'Metric': ['Accuracy','ROC_AUC'],
-    'Value': [0.940206,0.975888]}
-)
-
-metrica
+#| eval: false
+from sklearn.metrics import classification_report
+print(classification_report(y_valid_fold, valid_pred))
 ```
 
 ```{python}
@@ -873,20 +848,6 @@ metrica = pd.DataFrame({
 
 metrica
 ```
-
-**Análisis de la Curva ROC**
-
-![**ROC CatBoosts**](img/cat_boost.png){fig-align="center"}
-
-Para evaluar el desempeño del modelo de clasificación, se construyó una curva ROC (*Receiver Operating Characteristic*). Esta curva ilustra la relación entre la tasa de verdaderos positivos (*sensibilidad*) y la tasa de falsos positivos (*1-especificidad*) para diferentes umbrales 1 de clasificación. El área bajo la curva ROC (AUC) es una medida resumida del rendimiento del modelo, donde un valor cercano a 1 indica una excelente capacidad discriminatoria. En este caso, el modelo obtuvo un AUC de $0.9758$, lo cual sugiere un alto poder clasificatorio.
-
-Sin embargo, en el contexto de la detección de la depresión, minimizar la tasa de falsos negativos es de suma importancia. Un falso negativo implica que el modelo clasifica erróneamente a un individuo con depresión como no deprimido, lo que podría retrasar el acceso a tratamientos adecuados. Por esta razón, buscamos mover el threshold para la clasificación hacia la derecha incrementando el *False Positive Rate*.
-
-Para identificar un punto de corte adecuado, se realizó un análisis visual de la curva ROC y calculando el punto óptimo en la curva se obtuvo aproximadamente $0.25$ como Threshold. Este punto de corte permite obtener una alta sensibilidad, es decir, una alta probabilidad de detectar correctamente a los individuos con depresión, al tiempo que se mantiene una tasa de falsos positivos aceptable.
-
-![**Matrix CatBoosts**](img/matrix_catboots.png){fig-align="center"}
-
-Es importante destacar que la elección del punto de corte implica un equilibrio entre sensibilidad y especificidad. Un punto de corte más conservador (menor tasa de falsos positivos) podría disminuir la cantidad de falsos negativos, pero también reduciría la sensibilidad del modelo. Por tanto, la decisión final debe considerar las implicaciones clínicas y los costos asociados a los falsos positivos y falsos negativos.
 
 ## 5. Selección de modelo
 
@@ -955,7 +916,7 @@ el enfoque descrito anteriormente, permite identificar de manera eficiente la co
 4.  **Resultados**:
 
     | **Hyperparameter** | **Value** | **Description** |
-    |----|----|----|
+    |-----------------|-----------------|---------------------------------------|
     | **iterations** | 633 | Número total de iteraciones del modelo. |
     | **learning_rate** | 0.18918646362839026 | Tasa de aprendizaje para ajustar la contribución de cada iteración. |
     | **depth** | 4 | Profundidad máxima de los árboles de decisión. |
@@ -965,11 +926,11 @@ el enfoque descrito anteriormente, permite identificar de manera eficiente la co
     | **l2_leaf_reg** | 10.504885456201343 | Regularización L2 aplicada a las hojas para prevenir sobreajuste. |
     | **random_strength** | 0.664861942866057 | Amplitud de la distribución aleatoria utilizada para las divisiones del árbol. |
 
-Estos hiperparámetros optimizados permiten al modelo de CatBoost alcanzar un desempeño óptimo en la clasificación de la variable objetivo, **depression**, en el dataset analizado. La optimización de hiperparámetros es un paso crítico en el desarrollo de modelos de aprendizaje automático, ya que permite ajustar la configuración del modelo para maximizar su capacidad para clasificación y generalización.
+Estos hiperparámetros optimizados permiten al modelo de CatBoost alcanzar un desempeño óptimo en la predicción de la variable objetivo, **depression**, en el dataset analizado. La optimización de hiperparámetros es un paso crítico en el desarrollo de modelos de aprendizaje automático, ya que permite ajustar la configuración del modelo para maximizar su capacidad predictiva y generalización.
 
 ### 5.2 Validación cruzada
 
-El modelo de CatBoost se evaluó mediante validación cruzada con 20 particiones estratificadas, lo que garantiza una distribución equitativa de las clases en cada fold. Los resultados de la validación cruzada muestran una precisión promedio de 0.9402 en los 10 folds, lo que indica un desempeño consistente y robusto del modelo de clasificación. La precisión obtenida en cada fold es la siguiente:
+El modelo de CatBoost se evaluó mediante validación cruzada con 20 particiones estratificadas, lo que garantiza una distribución equitativa de las clases en cada fold. Los resultados de la validación cruzada muestran una precisión promedio de 0.9402 en los 10 folds, lo que indica un desempeño consistente y robusto del modelo en la predicción de la variable objetivo, **depression**. La precisión obtenida en cada fold es la siguiente:
 
 | **Fold**    | **Accuracy Score**    |
 |-------------|-----------------------|
@@ -987,7 +948,7 @@ El modelo de CatBoost se evaluó mediante validación cruzada con 20 particiones
 
 ### 5.3 Comparación de modelos
 
-Los modelos de CatBoost, XGBClassifier y Regresión Logística se compararon en términos de precisión (accuracy) y otras métricas relevantes para evaluar su desempeño en la clasificación . Los resultados obtenidos se presentan a continuación:
+Los modelos de CatBoost, XGBClassifier y Regresión Logística se compararon en términos de precisión (accuracy) y otras métricas relevantes para evaluar su desempeño en la predicción de la variable objetivo, **depression**. Los resultados obtenidos se presentan a continuación:
 
 | **Model**           | **Accuracy** |
 |---------------------|--------------|
@@ -997,13 +958,13 @@ Los modelos de CatBoost, XGBClassifier y Regresión Logística se compararon en 
 
 ## 6. Conclusiones
 
-En este reporte, exploramos la relación entre diversos factores y la presencia de depresión en adultos mediante técnicas de aprendizaje automático. La depresión, como condición compleja que afecta aspectos emocionales, cognitivos y físicos, requiere un enfoque que permita identificar patrones subyacentes en los datos. A través de modelos como la **Regresión Logística**, el **XGBClassifier** y el **CatBoost**, se analizaron estas relaciones y se evaluó la capacidad de clasificación.
+En este reporte, exploramos la relación entre diversos factores y la presencia de depresión en adultos mediante técnicas de aprendizaje automático. La depresión, como condición compleja que afecta aspectos emocionales, cognitivos y físicos, requiere un enfoque que permita identificar patrones subyacentes en los datos. A través de modelos como la **Regresión Logística**, el **XGBClassifier** y el **CatBoost**, se analizaron estas relaciones y se evaluó la capacidad predictiva de cada enfoque.
 
-El modelo de **Regresión Logística**, usado como baseline, permitió identificar relaciones lineales entre variables como satisfacción laboral, horas de sueño, y presión académica con la depresión. Su simplicidad y alta interpretabilidad facilitaron una comprensión inicial de cómo cada variable contribuye a clasificar. Sin embargo, su desempeño quedó limitado al no capturar interacciones más complejas entre los factores.
+El modelo de **Regresión Logística**, usado como baseline, permitió identificar relaciones lineales entre variables como satisfacción laboral, horas de sueño, y presión académica con la depresión. Su simplicidad y alta interpretabilidad facilitaron una comprensión inicial de cómo cada variable contribuye a predecir la variable objetivo. Sin embargo, su desempeño quedó limitado al no capturar interacciones más complejas entre los factores.
 
 El **XGBClassifier** representó un avance significativo al modelar relaciones no lineales y combinaciones entre variables, como la interacción entre estrés financiero, historial familiar de enfermedades mentales, y satisfacción general. Este modelo ofreció una mayor precisión global y destacó factores clave con mayor peso en la clasificación.
 
-Sin embargo, fue el modelo de **CatBoost** el que demostró ser el más robusto y eficiente en la clasificación de una persona con depresión. **CatBoost**, gracias a su manejo nativo de variables categóricas y su capacidad para regularizar el sobreajuste, obtuvo el mejor desempeño general. Este modelo sobresalió no solo en métricas de evaluación como *precisión* y *AUC-ROC*, sino también en su capacidad de interpretabilidad al identificar las variables más influyentes. Las relaciones detectadas entre variables como satisfacción académica, presión laboral, y horas de sueño reflejan un enfoque integral que permite clasificar si un adulto tiene depresión desde múltiples dimensiones. Este análisis demuestra que el aprendizaje automático, combinado con enfoques avanzados como CatBoost, es una herramienta poderosa para relacionar condiciones complejas que pueden asociarse al riesgo de depresión. Las relaciones detectadas entre variables no solo mejoran la capacidad de clasificación del modelo, sino que también ofrecen insights valiosos para análisis más profundos desde el punto de vista académico.
+Sin embargo, fue el modelo de **CatBoost** el que demostró ser el más robusto y eficiente en la predicción de la depresión. CatBoost, gracias a su manejo nativo de variables categóricas y su capacidad para regularizar el sobreajuste, obtuvo el mejor desempeño general. Este modelo sobresalió no solo en métricas de evaluación como precisión y AUC-ROC, sino también en su capacidad de interpretabilidad al identificar las variables más influyentes. Las relaciones detectadas entre variables como satisfacción académica, presión laboral, y horas de sueño reflejan un enfoque integral que permite abordar la depresión desde múltiples dimensiones. Este análisis demuestra que el aprendizaje automático, combinado con enfoques avanzados como CatBoost, es una herramienta poderosa para predecir condiciones complejas como la depresión. Las relaciones detectadas entre variables no solo mejoran la capacidad de predicción, sino que también ofrecen insights valiosos para diseñar estrategias preventivas y personalizadas. Al integrar estos modelos en entornos clínicos y de bienestar, es posible mejorar la detección temprana y el tratamiento de la depresión, contribuyendo a una atención más efectiva y centrada en el paciente.
 
 ## 7. Referencias
 
